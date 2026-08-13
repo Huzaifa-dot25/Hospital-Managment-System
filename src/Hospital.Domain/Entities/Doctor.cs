@@ -10,5 +10,10 @@ namespace Hospital.Domain.Entities
         public string LicenseNumber { get; set; } = string.Empty;
         public int YearsOfExperience { get; set; }
         public string ContactNumber { get; set; } = string.Empty;
+
+        // Foreign Key
+        public Guid DepartmentId { get; set; }
+        // Navigation Property
+        public Department Department { get; set; } = null!;
     }
 }

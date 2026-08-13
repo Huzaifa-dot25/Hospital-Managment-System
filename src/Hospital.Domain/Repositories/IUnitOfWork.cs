@@ -8,6 +8,7 @@ namespace Hospital.Domain.Repositories
     {
         IPatientRepository Patients { get; }
         IDoctorRepository Doctors { get; }
+        IDepartmentRepository Departments { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

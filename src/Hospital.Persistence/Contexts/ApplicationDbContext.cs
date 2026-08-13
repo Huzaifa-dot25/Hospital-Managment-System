@@ -16,6 +16,7 @@ namespace Hospital.Persistence.Contexts
 
         public DbSet<Patient> Patients => Set<Patient>();
         public DbSet<Doctor> Doctors => Set<Doctor>();
+        public DbSet<Department> Departments => Set<Department>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,6 +27,7 @@ namespace Hospital.Persistence.Contexts
             // Global query filter to automatically filter out soft-deleted entities
             modelBuilder.Entity<Patient>().HasQueryFilter(p => !p.IsDeleted);
             modelBuilder.Entity<Doctor>().HasQueryFilter(d => !d.IsDeleted);
+            modelBuilder.Entity<Department>().HasQueryFilter(d => !d.IsDeleted);
 
             base.OnModelCreating(modelBuilder);
         }

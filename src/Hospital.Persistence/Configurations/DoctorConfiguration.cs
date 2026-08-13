@@ -30,6 +30,9 @@ namespace Hospital.Persistence.Configurations
 
             builder.Property(d => d.ContactNumber)
                 .HasMaxLength(20);
+
+            builder.Property(d => d.DepartmentId)
+                .IsRequired();
         }
     }
 }

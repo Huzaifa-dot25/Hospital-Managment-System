@@ -9,8 +9,9 @@ namespace Hospital.Persistence.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _dbContext;
-        private IPatientRepository _patientRepository;
-        private IDoctorRepository _doctorRepository;
+        private IPatientRepository? _patientRepository;
+        private IDoctorRepository? _doctorRepository;
+        private IDepartmentRepository? _departmentRepository;
         private bool _disposed;
 
         public UnitOfWork(ApplicationDbContext dbContext)
@@ -21,6 +22,8 @@ namespace Hospital.Persistence.Repositories
         public IPatientRepository Patients => _patientRepository ??= new PatientRepository(_dbContext);
 
         public IDoctorRepository Doctors => _doctorRepository ??= new DoctorRepository(_dbContext);
+
+        public IDepartmentRepository Departments => _departmentRepository ??= new DepartmentRepository(_dbContext);
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
