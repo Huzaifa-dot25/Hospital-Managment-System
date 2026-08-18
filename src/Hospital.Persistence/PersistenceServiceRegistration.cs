@@ -17,6 +17,8 @@ namespace Hospital.Persistence
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IPatientRepository, PatientRepository>();
             services.AddScoped<IDoctorRepository, DoctorRepository>();
+            services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;

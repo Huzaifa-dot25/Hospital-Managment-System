@@ -11,15 +11,16 @@ namespace Hospital.Application
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             // Register AutoMapper
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(config => config.AddMaps(Assembly.GetExecutingAssembly()));
 
             // Register FluentValidation
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // Register Application Services
             services.AddScoped<IDepartmentService, DepartmentService>();
-            
-            // We will add PatientService and DoctorService here later!
+            services.AddScoped<IDoctorService, DoctorService>();
+            services.AddScoped<IPatientService, PatientService>();
+            services.AddScoped<IAppointmentService, AppointmentService>();
 
             return services;
         }

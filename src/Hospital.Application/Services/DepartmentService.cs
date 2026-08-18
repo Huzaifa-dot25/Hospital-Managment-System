@@ -81,7 +81,7 @@ namespace Hospital.Application.Services
             _mapper.Map(updateDepartmentDto, departmentToUpdate);
             departmentToUpdate.UpdatedDate = DateTime.UtcNow;
 
-            _unitOfWork.Departments.Update(departmentToUpdate);
+            await _unitOfWork.Departments.UpdateAsync(departmentToUpdate);
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -93,7 +93,7 @@ namespace Hospital.Application.Services
                 throw new NotFoundException(nameof(Department), id);
             }
 
-            _unitOfWork.Departments.Delete(departmentToDelete);
+            await _unitOfWork.Departments.DeleteAsync(departmentToDelete);
             await _unitOfWork.SaveChangesAsync();
         }
     }

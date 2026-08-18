@@ -14,9 +14,10 @@ namespace Hospital.Persistence.Contexts
         {
         }
 
-        public DbSet<Patient> Patients => Set<Patient>();
-        public DbSet<Doctor> Doctors => Set<Doctor>();
-        public DbSet<Department> Departments => Set<Department>();
+        public DbSet<Department> Departments { get; set; } = null!;
+        public DbSet<Doctor> Doctors { get; set; } = null!;
+        public DbSet<Patient> Patients { get; set; } = null!;
+        public DbSet<Appointment> Appointments { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +29,7 @@ namespace Hospital.Persistence.Contexts
             modelBuilder.Entity<Patient>().HasQueryFilter(p => !p.IsDeleted);
             modelBuilder.Entity<Doctor>().HasQueryFilter(d => !d.IsDeleted);
             modelBuilder.Entity<Department>().HasQueryFilter(d => !d.IsDeleted);
+            modelBuilder.Entity<Appointment>().HasQueryFilter(a => !a.IsDeleted);
 
             base.OnModelCreating(modelBuilder);
         }
