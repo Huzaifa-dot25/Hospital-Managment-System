@@ -1,5 +1,8 @@
 using Hospital.Domain.Common;
 using Hospital.Domain.Entities;
+using Hospital.Domain.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Reflection;
@@ -8,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Hospital.Persistence.Contexts
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -18,9 +21,12 @@ namespace Hospital.Persistence.Contexts
         public DbSet<Doctor> Doctors { get; set; } = null!;
         public DbSet<Patient> Patients { get; set; } = null!;
         public DbSet<Appointment> Appointments { get; set; } = null!;
+        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder); // Crucial for Identity models
+
             // This will automatically apply all configurations (like PatientConfiguration) 
             // defined in this assembly.
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
@@ -30,8 +36,6 @@ namespace Hospital.Persistence.Contexts
             modelBuilder.Entity<Doctor>().HasQueryFilter(d => !d.IsDeleted);
             modelBuilder.Entity<Department>().HasQueryFilter(d => !d.IsDeleted);
             modelBuilder.Entity<Appointment>().HasQueryFilter(a => !a.IsDeleted);
-
-            base.OnModelCreating(modelBuilder);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
