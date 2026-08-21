@@ -1,3 +1,4 @@
+using Hospital.Application.Services.Interfaces;
 using Hospital.Domain.Common;
 using Hospital.Domain.Entities;
 using Hospital.Domain.Entities.Identity;
@@ -13,8 +14,13 @@ namespace Hospital.Persistence.Contexts
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        private readonly ICurrentUserService _currentUserService;
+
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            ICurrentUserService currentUserService) : base(options)
         {
+            _currentUserService = currentUserService;
         }
 
         public DbSet<Department> Departments { get; set; } = null!;
@@ -46,19 +52,18 @@ namespace Hospital.Persistence.Contexts
                 {
                     case EntityState.Added:
                         entry.Entity.CreatedDate = DateTime.UtcNow;
-                        // To do: Get user id from current user context
-                        entry.Entity.CreatedBy = "System"; 
+                        entry.Entity.CreatedBy = _currentUserService.UserId; 
                         break;
                     case EntityState.Modified:
                         entry.Entity.UpdatedDate = DateTime.UtcNow;
-                        entry.Entity.UpdatedBy = "System";
+                        entry.Entity.UpdatedBy = _currentUserService.UserId;
                         break;
                     case EntityState.Deleted:
                         // Implement soft delete
                         entry.State = EntityState.Modified;
                         entry.Entity.IsDeleted = true;
                         entry.Entity.DeletedDate = DateTime.UtcNow;
-                        entry.Entity.DeletedBy = "System";
+                        entry.Entity.DeletedBy = _currentUserService.UserId;
                         break;
                 }
             }
