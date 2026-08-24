@@ -7,6 +7,9 @@ using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 
+// Alias our custom ValidationException to avoid ambiguity with FluentValidation's
+using AppValidationException = Hospital.Application.Exceptions.ValidationException;
+
 namespace Hospital.API.Middleware
 {
     public class ExceptionMiddleware
@@ -38,7 +41,7 @@ namespace Hospital.API.Middleware
             var statusCode = exception switch
             {
                 BadRequestException => (int)HttpStatusCode.BadRequest,
-                ValidationException => (int)HttpStatusCode.BadRequest,
+                AppValidationException => (int)HttpStatusCode.BadRequest,
                 NotFoundException => (int)HttpStatusCode.NotFound,
                 _ => (int)HttpStatusCode.InternalServerError
             };
@@ -53,7 +56,7 @@ namespace Hospital.API.Middleware
                 Instance = context.Request.Path
             };
 
-            if (exception is ValidationException validationException)
+            if (exception is AppValidationException validationException)
             {
                 problemDetails.Extensions.Add("errors", validationException.Errors);
             }
@@ -66,7 +69,7 @@ namespace Hospital.API.Middleware
             exception switch
             {
                 BadRequestException => "Bad Request",
-                ValidationException => "Validation Error",
+                AppValidationException => "Validation Error",
                 NotFoundException => "Not Found",
                 _ => "Internal Server Error"
             };

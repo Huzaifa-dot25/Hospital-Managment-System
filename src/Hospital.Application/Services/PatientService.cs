@@ -9,6 +9,8 @@ using Hospital.Application.Services.Interfaces;
 using Hospital.Domain.Entities;
 using Hospital.Domain.Repositories;
 
+using AppValidationException = Hospital.Application.Exceptions.ValidationException;
+
 namespace Hospital.Application.Services
 {
     public class PatientService : IPatientService
@@ -51,7 +53,7 @@ namespace Hospital.Application.Services
             var validationResult = await _createValidator.ValidateAsync(createPatientDto);
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new AppValidationException(validationResult.Errors);
             }
 
             var patient = _mapper.Map<Patient>(createPatientDto);
@@ -68,7 +70,7 @@ namespace Hospital.Application.Services
             var validationResult = await _updateValidator.ValidateAsync(updatePatientDto);
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new AppValidationException(validationResult.Errors);
             }
 
             var patientToUpdate = await _unitOfWork.Patients.GetByIdAsync(updatePatientDto.Id);

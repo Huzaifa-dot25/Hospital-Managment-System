@@ -9,6 +9,8 @@ using Hospital.Application.Services.Interfaces;
 using Hospital.Domain.Entities;
 using Hospital.Domain.Repositories;
 
+using AppValidationException = Hospital.Application.Exceptions.ValidationException;
+
 namespace Hospital.Application.Services
 {
     public class AppointmentService : IAppointmentService
@@ -32,13 +34,17 @@ namespace Hospital.Application.Services
 
         public async Task<IEnumerable<AppointmentDto>> GetAllAppointmentsAsync()
         {
-            var appointments = await _unitOfWork.Appointments.GetAllAsync();
+            // Use GetAllWithDetailsAsync() to load Patient and Doctor navigation properties.
+            // AppointmentProfile maps PatientName = Patient.FirstName + LastName
+            // and DoctorName = Doctor.FirstName + LastName.
+            // Without Include(), those would be null and mapping would throw.
+            var appointments = await _unitOfWork.Appointments.GetAllWithDetailsAsync();
             return _mapper.Map<IEnumerable<AppointmentDto>>(appointments);
         }
 
         public async Task<AppointmentDto> GetAppointmentByIdAsync(Guid id)
         {
-            var appointment = await _unitOfWork.Appointments.GetByIdAsync(id);
+            var appointment = await _unitOfWork.Appointments.GetByIdWithDetailsAsync(id);
             if (appointment == null)
             {
                 throw new NotFoundException(nameof(Appointment), id);
@@ -51,7 +57,7 @@ namespace Hospital.Application.Services
             var validationResult = await _createValidator.ValidateAsync(createAppointmentDto);
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new AppValidationException(validationResult.Errors);
             }
 
             var patient = await _unitOfWork.Patients.GetByIdAsync(createAppointmentDto.PatientId);
@@ -80,7 +86,7 @@ namespace Hospital.Application.Services
             var validationResult = await _updateValidator.ValidateAsync(updateAppointmentDto);
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new AppValidationException(validationResult.Errors);
             }
 
             var appointmentToUpdate = await _unitOfWork.Appointments.GetByIdAsync(updateAppointmentDto.Id);

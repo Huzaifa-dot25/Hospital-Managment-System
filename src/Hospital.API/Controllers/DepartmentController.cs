@@ -1,14 +1,21 @@
 using Hospital.Application.DTOs.Department;
 using Hospital.Application.Services.Interfaces;
+using Hospital.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Hospital.API.Controllers
 {
+    /// <summary>
+    /// Manages hospital departments (Cardiology, Neurology, Orthopedics, etc.)
+    /// Departments are mostly read-only for most staff.
+    /// Only SuperAdmin/Admin can create or modify them.
+    /// </summary>
     [ApiController]
     [Route("api/v1/[controller]")]
+    [Authorize]
     public class DepartmentController : ControllerBase
     {
         private readonly IDepartmentService _departmentService;
@@ -18,44 +25,67 @@ namespace Hospital.API.Controllers
             _departmentService = departmentService;
         }
 
+        /// <summary>
+        /// Returns all hospital departments.
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DepartmentDto>>> GetAllDepartments()
+        [Authorize(Roles = "SuperAdmin,Admin,Doctor,Nurse,Receptionist,Patient,Pharmacist,LabTechnician")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<DepartmentDto>>>> GetAllDepartments()
         {
             var departments = await _departmentService.GetAllDepartmentsAsync();
-            return Ok(departments);
+            return Ok(ApiResponse<IEnumerable<DepartmentDto>>.SuccessResult(departments, "Departments retrieved successfully"));
         }
 
+        /// <summary>
+        /// Returns a single department by ID.
+        /// </summary>
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<DepartmentDto>> GetDepartmentById(Guid id)
+        [Authorize(Roles = "SuperAdmin,Admin,Doctor,Nurse,Receptionist,Patient,Pharmacist,LabTechnician")]
+        public async Task<ActionResult<ApiResponse<DepartmentDto>>> GetDepartmentById(Guid id)
         {
             var department = await _departmentService.GetDepartmentByIdAsync(id);
-            return Ok(department);
+            return Ok(ApiResponse<DepartmentDto>.SuccessResult(department, "Department retrieved successfully"));
         }
 
+        /// <summary>
+        /// Creates a new department. SuperAdmin/Admin only.
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<DepartmentDto>> CreateDepartment([FromBody] CreateDepartmentDto createDepartmentDto)
+        [Authorize(Roles = "SuperAdmin,Admin")]
+        public async Task<ActionResult<ApiResponse<DepartmentDto>>> CreateDepartment([FromBody] CreateDepartmentDto createDepartmentDto)
         {
             var createdDepartment = await _departmentService.CreateDepartmentAsync(createDepartmentDto);
-            return CreatedAtAction(nameof(GetDepartmentById), new { id = createdDepartment.Id }, createdDepartment);
+            return CreatedAtAction(
+                nameof(GetDepartmentById),
+                new { id = createdDepartment.Id },
+                ApiResponse<DepartmentDto>.SuccessResult(createdDepartment, "Department created successfully"));
         }
 
+        /// <summary>
+        /// Updates a department. SuperAdmin/Admin only.
+        /// </summary>
         [HttpPut("{id:guid}")]
-        public async Task<ActionResult> UpdateDepartment(Guid id, [FromBody] UpdateDepartmentDto updateDepartmentDto)
+        [Authorize(Roles = "SuperAdmin,Admin")]
+        public async Task<ActionResult<ApiResponse>> UpdateDepartment(Guid id, [FromBody] UpdateDepartmentDto updateDepartmentDto)
         {
             if (id != updateDepartmentDto.Id)
             {
-                return BadRequest("ID in URL does not match ID in request body.");
+                return BadRequest(ApiResponse.FailResult("ID in URL does not match ID in request body."));
             }
 
             await _departmentService.UpdateDepartmentAsync(updateDepartmentDto);
-            return NoContent();
+            return Ok(ApiResponse.SuccessResult("Department updated successfully"));
         }
 
+        /// <summary>
+        /// Soft-deletes a department. SuperAdmin only.
+        /// </summary>
         [HttpDelete("{id:guid}")]
-        public async Task<ActionResult> DeleteDepartment(Guid id)
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<ActionResult<ApiResponse>> DeleteDepartment(Guid id)
         {
             await _departmentService.DeleteDepartmentAsync(id);
-            return NoContent();
+            return Ok(ApiResponse.SuccessResult("Department deleted successfully"));
         }
     }
 }

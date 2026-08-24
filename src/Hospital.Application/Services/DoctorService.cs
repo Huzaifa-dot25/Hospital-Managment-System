@@ -9,6 +9,8 @@ using Hospital.Application.Services.Interfaces;
 using Hospital.Domain.Entities;
 using Hospital.Domain.Repositories;
 
+using AppValidationException = Hospital.Application.Exceptions.ValidationException;
+
 namespace Hospital.Application.Services
 {
     public class DoctorService : IDoctorService
@@ -32,14 +34,17 @@ namespace Hospital.Application.Services
 
         public async Task<IEnumerable<DoctorDto>> GetAllDoctorsAsync()
         {
-            var doctors = await _unitOfWork.Doctors.GetAllAsync();
-            // Note: In a real app we might want to include the Department data in the query
+            // Use GetAllWithDepartmentAsync() instead of GetAllAsync()
+            // so the Department navigation property is loaded.
+            // Without this, src.Department.Name in DoctorProfile throws NullReferenceException.
+            var doctors = await _unitOfWork.Doctors.GetAllWithDepartmentAsync();
             return _mapper.Map<IEnumerable<DoctorDto>>(doctors);
         }
 
         public async Task<DoctorDto> GetDoctorByIdAsync(Guid id)
         {
-            var doctor = await _unitOfWork.Doctors.GetByIdAsync(id);
+            // Use the eager-loading version here too
+            var doctor = await _unitOfWork.Doctors.GetByIdWithDepartmentAsync(id);
             if (doctor == null)
             {
                 throw new NotFoundException(nameof(Doctor), id);
@@ -52,7 +57,7 @@ namespace Hospital.Application.Services
             var validationResult = await _createValidator.ValidateAsync(createDoctorDto);
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new AppValidationException(validationResult.Errors);
             }
 
             // Verify if department exists
@@ -76,7 +81,7 @@ namespace Hospital.Application.Services
             var validationResult = await _updateValidator.ValidateAsync(updateDoctorDto);
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new AppValidationException(validationResult.Errors);
             }
 
             var doctorToUpdate = await _unitOfWork.Doctors.GetByIdAsync(updateDoctorDto.Id);

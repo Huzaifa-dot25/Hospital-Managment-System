@@ -9,6 +9,11 @@ using Hospital.Application.Services.Interfaces;
 using Hospital.Domain.Entities;
 using Hospital.Domain.Repositories;
 
+// Alias to disambiguate: our ValidationException vs FluentValidation.ValidationException
+// Our custom one lives in Hospital.Application.Exceptions and has the Errors dictionary
+// that our ExceptionMiddleware reads to return structured field-level errors.
+using AppValidationException = Hospital.Application.Exceptions.ValidationException;
+
 namespace Hospital.Application.Services
 {
     public class DepartmentService : IDepartmentService
@@ -51,7 +56,7 @@ namespace Hospital.Application.Services
             var validationResult = await _createValidator.ValidateAsync(createDepartmentDto);
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new AppValidationException(validationResult.Errors);
             }
 
             var department = _mapper.Map<Department>(createDepartmentDto);
@@ -68,7 +73,7 @@ namespace Hospital.Application.Services
             var validationResult = await _updateValidator.ValidateAsync(updateDepartmentDto);
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(validationResult.Errors);
+                throw new AppValidationException(validationResult.Errors);
             }
 
             var departmentToUpdate = await _unitOfWork.Departments.GetByIdAsync(updateDepartmentDto.Id);
