@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AutoMapper;
 using FluentValidation;
 using Hospital.Application.DTOs.Doctor;
@@ -8,11 +5,24 @@ using Hospital.Application.Exceptions;
 using Hospital.Application.Services.Interfaces;
 using Hospital.Domain.Entities;
 using Hospital.Domain.Repositories;
+using Hospital.Shared.Models;
+using Hospital.Shared.Queries;
+using System;
+using System.Threading.Tasks;
 
 using AppValidationException = Hospital.Application.Exceptions.ValidationException;
 
 namespace Hospital.Application.Services
 {
+    /// <summary>
+    /// Implements all Doctor use cases.
+    ///
+    /// Key difference from PatientService:
+    /// Doctors have a foreign key to Department.
+    /// When creating/updating, we validate the DepartmentId exists before saving.
+    /// When reading, we use eager-loading versions of the repository
+    /// so DoctorDto.DepartmentName gets populated correctly.
+    /// </summary>
     public class DoctorService : IDoctorService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -32,90 +42,89 @@ namespace Hospital.Application.Services
             _updateValidator = updateValidator;
         }
 
-        public async Task<IEnumerable<DoctorDto>> GetAllDoctorsAsync()
+        /// <inheritdoc />
+        public async Task<PagedResponse<DoctorDto>> GetPagedAsync(DoctorQueryParams queryParams)
         {
-            // Use GetAllWithDepartmentAsync() instead of GetAllAsync()
-            // so the Department navigation property is loaded.
-            // Without this, src.Department.Name in DoctorProfile throws NullReferenceException.
-            var doctors = await _unitOfWork.Doctors.GetAllWithDepartmentAsync();
-            return _mapper.Map<IEnumerable<DoctorDto>>(doctors);
+            // GetPagedAsync in DoctorRepository always includes Department,
+            // so DoctorProfile can safely read src.Department.Name
+            var (doctors, totalCount) = await _unitOfWork.Doctors.GetPagedAsync(queryParams);
+
+            var doctorDtos = _mapper.Map<System.Collections.Generic.List<DoctorDto>>(doctors);
+
+            return PagedResponse<DoctorDto>.Create(
+                doctorDtos,
+                totalCount,
+                queryParams.PageNumber,
+                queryParams.PageSize);
         }
 
+        /// <inheritdoc />
         public async Task<DoctorDto> GetDoctorByIdAsync(Guid id)
         {
-            // Use the eager-loading version here too
+            // Use the eager-loading version — plain GetByIdAsync won't load Department
             var doctor = await _unitOfWork.Doctors.GetByIdWithDepartmentAsync(id);
             if (doctor == null)
-            {
                 throw new NotFoundException(nameof(Doctor), id);
-            }
+
             return _mapper.Map<DoctorDto>(doctor);
         }
 
+        /// <inheritdoc />
         public async Task<DoctorDto> CreateDoctorAsync(CreateDoctorDto createDoctorDto)
         {
             var validationResult = await _createValidator.ValidateAsync(createDoctorDto);
             if (!validationResult.IsValid)
-            {
                 throw new AppValidationException(validationResult.Errors);
-            }
 
-            // Verify if department exists
+            // Business rule: the referenced department must exist.
+            // A doctor cannot belong to a department that doesn't exist.
             var department = await _unitOfWork.Departments.GetByIdAsync(createDoctorDto.DepartmentId);
             if (department == null)
-            {
                 throw new NotFoundException(nameof(Department), createDoctorDto.DepartmentId);
-            }
 
             var doctor = _mapper.Map<Doctor>(createDoctorDto);
-            doctor.CreatedDate = DateTime.UtcNow;
-
             await _unitOfWork.Doctors.AddAsync(doctor);
             await _unitOfWork.SaveChangesAsync();
 
-            return _mapper.Map<DoctorDto>(doctor);
+            // After save, reload with Department so the response includes DepartmentName
+            // (the entity we just created doesn't have Department loaded yet)
+            var created = await _unitOfWork.Doctors.GetByIdWithDepartmentAsync(doctor.Id);
+            return _mapper.Map<DoctorDto>(created!);
         }
 
+        /// <inheritdoc />
         public async Task UpdateDoctorAsync(UpdateDoctorDto updateDoctorDto)
         {
             var validationResult = await _updateValidator.ValidateAsync(updateDoctorDto);
             if (!validationResult.IsValid)
-            {
                 throw new AppValidationException(validationResult.Errors);
-            }
 
-            var doctorToUpdate = await _unitOfWork.Doctors.GetByIdAsync(updateDoctorDto.Id);
-            if (doctorToUpdate == null)
-            {
+            // Use plain GetById for the update — we only need the entity, not its relations
+            var doctor = await _unitOfWork.Doctors.GetByIdAsync(updateDoctorDto.Id);
+            if (doctor == null)
                 throw new NotFoundException(nameof(Doctor), updateDoctorDto.Id);
-            }
 
-            // Verify if department exists if it was changed
-            if (doctorToUpdate.DepartmentId != updateDoctorDto.DepartmentId)
+            // Only validate the new DepartmentId if it actually changed
+            if (doctor.DepartmentId != updateDoctorDto.DepartmentId)
             {
                 var department = await _unitOfWork.Departments.GetByIdAsync(updateDoctorDto.DepartmentId);
                 if (department == null)
-                {
                     throw new NotFoundException(nameof(Department), updateDoctorDto.DepartmentId);
-                }
             }
 
-            _mapper.Map(updateDoctorDto, doctorToUpdate);
-            doctorToUpdate.UpdatedDate = DateTime.UtcNow;
-
-            await _unitOfWork.Doctors.UpdateAsync(doctorToUpdate);
+            _mapper.Map(updateDoctorDto, doctor);
+            await _unitOfWork.Doctors.UpdateAsync(doctor);
             await _unitOfWork.SaveChangesAsync();
         }
 
+        /// <inheritdoc />
         public async Task DeleteDoctorAsync(Guid id)
         {
-            var doctorToDelete = await _unitOfWork.Doctors.GetByIdAsync(id);
-            if (doctorToDelete == null)
-            {
+            var doctor = await _unitOfWork.Doctors.GetByIdAsync(id);
+            if (doctor == null)
                 throw new NotFoundException(nameof(Doctor), id);
-            }
 
-            await _unitOfWork.Doctors.DeleteAsync(doctorToDelete);
+            await _unitOfWork.Doctors.DeleteAsync(doctor);
             await _unitOfWork.SaveChangesAsync();
         }
     }

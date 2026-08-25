@@ -1,6 +1,8 @@
 using Hospital.Application.DTOs.Patient;
 using Hospital.Application.Services.Interfaces;
+using Hospital.Shared.Constants;
 using Hospital.Shared.Models;
+using Hospital.Shared.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -8,17 +10,9 @@ using System.Threading.Tasks;
 
 namespace Hospital.API.Controllers
 {
-    /// <summary>
-    /// Manages patient records.
-    /// 
-    /// Authorization strategy:
-    ///   - Reading patients: Doctors, Nurses, Receptionists, and Admins can all view
-    ///   - Creating patients: Receptionist or Admin registers new patients at the front desk
-    ///   - Updating/Deleting: Admin only (sensitive data)
-    /// </summary>
     [ApiController]
     [Route("api/v1/[controller]")]
-    [Authorize] // ← All endpoints in this controller require a valid JWT token by default
+    [Authorize]
     public class PatientController : ControllerBase
     {
         private readonly IPatientService _patientService;
@@ -29,67 +23,58 @@ namespace Hospital.API.Controllers
         }
 
         /// <summary>
-        /// Retrieves all patients (non-deleted).
-        /// Accessible by: Admin, Doctor, Nurse, Receptionist
+        /// Returns a paginated, filterable list of patients.
+        /// Query: search, bloodGroup, gender, pageNumber, pageSize, sortBy, isDescending
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "SuperAdmin,Admin,Doctor,Nurse,Receptionist")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<PatientDto>>>> GetAllPatients()
+        [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Doctor},{Roles.Nurse},{Roles.Receptionist}")]
+        public async Task<ActionResult<ApiResponse<PagedResponse<PatientDto>>>> GetPatients(
+            [FromQuery] PatientQueryParams queryParams)
         {
-            var patients = await _patientService.GetAllPatientsAsync();
-            return Ok(ApiResponse<IEnumerable<PatientDto>>.SuccessResult(patients, "Patients retrieved successfully"));
+            var result = await _patientService.GetPagedAsync(queryParams);
+            return Ok(ApiResponse<PagedResponse<PatientDto>>.SuccessResult(
+                result,
+                $"Retrieved {result.Items.Count} of {result.TotalCount} patients"));
         }
 
-        /// <summary>
-        /// Retrieves a single patient by their unique ID.
-        /// Accessible by: Admin, Doctor, Nurse, Receptionist
-        /// </summary>
+        /// <summary>Returns a single patient by ID.</summary>
         [HttpGet("{id:guid}")]
-        [Authorize(Roles = "SuperAdmin,Admin,Doctor,Nurse,Receptionist")]
+        [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Doctor},{Roles.Nurse},{Roles.Receptionist}")]
         public async Task<ActionResult<ApiResponse<PatientDto>>> GetPatientById(Guid id)
         {
             var patient = await _patientService.GetPatientByIdAsync(id);
             return Ok(ApiResponse<PatientDto>.SuccessResult(patient, "Patient retrieved successfully"));
         }
 
-        /// <summary>
-        /// Registers a new patient in the system.
-        /// Accessible by: Admin, Receptionist
-        /// </summary>
+        /// <summary>Registers a new patient.</summary>
         [HttpPost]
-        [Authorize(Roles = "SuperAdmin,Admin,Receptionist")]
-        public async Task<ActionResult<ApiResponse<PatientDto>>> CreatePatient([FromBody] CreatePatientDto createPatientDto)
+        [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Receptionist}")]
+        public async Task<ActionResult<ApiResponse<PatientDto>>> CreatePatient(
+            [FromBody] CreatePatientDto createPatientDto)
         {
-            var createdPatient = await _patientService.CreatePatientAsync(createPatientDto);
+            var created = await _patientService.CreatePatientAsync(createPatientDto);
             return CreatedAtAction(
                 nameof(GetPatientById),
-                new { id = createdPatient.Id },
-                ApiResponse<PatientDto>.SuccessResult(createdPatient, "Patient created successfully"));
+                new { id = created.Id },
+                ApiResponse<PatientDto>.SuccessResult(created, "Patient registered successfully"));
         }
 
-        /// <summary>
-        /// Updates an existing patient's information.
-        /// Accessible by: Admin, Receptionist
-        /// </summary>
+        /// <summary>Updates an existing patient's information.</summary>
         [HttpPut("{id:guid}")]
-        [Authorize(Roles = "SuperAdmin,Admin,Receptionist")]
-        public async Task<ActionResult<ApiResponse>> UpdatePatient(Guid id, [FromBody] UpdatePatientDto updatePatientDto)
+        [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Receptionist}")]
+        public async Task<ActionResult<ApiResponse>> UpdatePatient(
+            Guid id, [FromBody] UpdatePatientDto updatePatientDto)
         {
             if (id != updatePatientDto.Id)
-            {
                 return BadRequest(ApiResponse.FailResult("ID in URL does not match ID in request body."));
-            }
 
             await _patientService.UpdatePatientAsync(updatePatientDto);
             return Ok(ApiResponse.SuccessResult("Patient updated successfully"));
         }
 
-        /// <summary>
-        /// Soft-deletes a patient (sets IsDeleted = true, does not remove from DB).
-        /// Accessible by: Admin only
-        /// </summary>
+        /// <summary>Soft-deletes a patient.</summary>
         [HttpDelete("{id:guid}")]
-        [Authorize(Roles = "SuperAdmin,Admin")]
+        [Authorize(Roles = Roles.AdminAndAbove)]
         public async Task<ActionResult<ApiResponse>> DeletePatient(Guid id)
         {
             await _patientService.DeletePatientAsync(id);

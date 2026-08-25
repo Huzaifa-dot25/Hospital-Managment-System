@@ -1,8 +1,10 @@
 using Hospital.Application.DTOs.Auth;
+using Hospital.Application.Exceptions;
 using Hospital.Application.Services.Interfaces;
 using Hospital.Domain.Entities.Identity;
 using Hospital.Domain.Repositories;
 using Hospital.Infrastructure.Authentication;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +16,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+
+using AppValidationException = Hospital.Application.Exceptions.ValidationException;
 
 namespace Hospital.Infrastructure.Services
 {
@@ -37,17 +41,23 @@ namespace Hospital.Infrastructure.Services
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly JwtOptions _jwtOptions;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly IValidator<LoginDto> _loginValidator;
+        private readonly IValidator<RegisterDto> _registerValidator;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole<Guid>> roleManager,
             IOptions<JwtOptions> jwtOptions,
-            IRefreshTokenRepository refreshTokenRepository)
+            IRefreshTokenRepository refreshTokenRepository,
+            IValidator<LoginDto> loginValidator,
+            IValidator<RegisterDto> registerValidator)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _jwtOptions = jwtOptions.Value;
             _refreshTokenRepository = refreshTokenRepository;
+            _loginValidator = loginValidator;
+            _registerValidator = registerValidator;
         }
 
         /// <summary>
@@ -55,6 +65,11 @@ namespace Hospital.Infrastructure.Services
         /// </summary>
         public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
         {
+            // Validate input first — fast-fail before touching the database
+            var validation = await _loginValidator.ValidateAsync(loginDto);
+            if (!validation.IsValid)
+                throw new AppValidationException(validation.Errors);
+
             // Step 1: Find user by email
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null || !user.IsActive)
@@ -93,6 +108,11 @@ namespace Hospital.Infrastructure.Services
         /// </summary>
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
         {
+            // Validate input — catches bad email format, weak password, invalid role etc.
+            var validation = await _registerValidator.ValidateAsync(registerDto);
+            if (!validation.IsValid)
+                throw new AppValidationException(validation.Errors);
+
             // Check for duplicate email
             var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
             if (existingUser != null)

@@ -24,7 +24,25 @@ builder.Host.UseSerilog();
 // "When anyone asks for IDepartmentService, give them DepartmentService"
 // ASP.NET Core handles the creation and lifetime of these objects automatically.
 // ─────────────────────────────────────────────────────────────────────────────
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serialize enums as their string name instead of their integer value.
+        //
+        // Without this:  "gender": 0,  "status": 1,  "bloodGroup": 2
+        // With this:     "gender": "Male",  "status": "Completed",  "bloodGroup": "BPositive"
+        //
+        // This makes the API self-documenting — clients don't need a separate
+        // enum lookup table. It applies to both serialization (response)
+        // and deserialization (request body), so "Male" and 0 both work as input.
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+
+        // Use camelCase for all JSON property names (standard for REST APIs).
+        // "FirstName" in C# → "firstName" in JSON.
+        options.JsonSerializerOptions.PropertyNamingPolicy =
+            System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 builder.Services.AddEndpointsApiExplorer();
 
 // ─────────────────────────────────────────────────────────────────────────────
