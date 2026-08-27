@@ -7,4 +7,12 @@
     <Project Path="src/Hospital.Persistence/Hospital.Persistence.csproj" />
     <Project Path="src/Hospital.Shared/Hospital.Shared.csproj" />
   </Folder>
+  <!--
+    Solution folder named /tests/ — this is a VIRTUAL folder in Visual Studio.
+    It does NOT create a folder on disk; it just groups projects in the Solution Explorer.
+    The actual files live in tests/UnitTests/ on disk.
+  -->
+  <Folder Name="/tests/">
+    <Project Path="tests/UnitTests/UnitTests.csproj" />
+  </Folder>
 </Solution>

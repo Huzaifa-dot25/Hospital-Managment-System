@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!--
+      IsPackable=false  → this project produces no NuGet package
+      IsTestProject=true → marks it as a test project for dotnet test discovery
+    -->
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      xUnit     — the test framework: [Fact], [Theory], test runner
+      xunit.runner.visualstudio — makes tests appear in Visual Studio's Test Explorer
+      Microsoft.NET.Test.Sdk — required by every .NET test project; integrates with dotnet test CLI
+    -->
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+
+    <!--
+      Moq — the mocking framework.
+      Lets us create fake implementations of interfaces without touching the database.
+      Example: Mock<IUnitOfWork> pretends to be a unit of work but returns whatever we tell it.
+    -->
+    <PackageReference Include="Moq" Version="4.20.72" />
+
+    <!--
+      FluentAssertions — makes Assert statements readable.
+      Instead of:  Assert.Equal("Cardiology", result.Name)
+      We write:    result.Name.Should().Be("Cardiology")
+      When a test fails, the error message is much more descriptive.
+    -->
+    <PackageReference Include="FluentAssertions" Version="7.2.0" />
+
+    <!--
+      AutoMapper — we reuse the REAL AutoMapper profiles from Hospital.Application.
+      This is intentional: we test the full service behaviour including mapping,
+      not with a fake mapper that skips the mapping logic.
+    -->
+    <PackageReference Include="AutoMapper" Version="16.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      We reference Hospital.Application directly because that's what we're testing.
+      Hospital.Application references Hospital.Domain and Hospital.Shared transitively,
+      so those are available without explicit references here.
+    -->
+    <ProjectReference Include="..\..\src\Hospital.Application\Hospital.Application.csproj" />
+    <ProjectReference Include="..\..\src\Hospital.Domain\Hospital.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Hospital.Shared\Hospital.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
