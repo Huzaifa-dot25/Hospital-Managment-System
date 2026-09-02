@@ -45,7 +45,7 @@ namespace IntegrationTests.Controllers
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             var body = await response.Content
-                .ReadFromJsonAsync<ApiResponse<PagedResponse<PatientDto>>>();
+                .ReadFromJsonAsync<ApiResponse<PagedResponse<PatientDto>>>(TestJsonOptions.Default);
 
             body!.Success.Should().BeTrue();
             body.Data.Should().NotBeNull();
@@ -100,7 +100,7 @@ namespace IntegrationTests.Controllers
             // ASSERT
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var body = await response.Content.ReadFromJsonAsync<ApiResponse<PatientDto>>();
+            var body = await response.Content.ReadFromJsonAsync<ApiResponse<PatientDto>>(TestJsonOptions.Default);
             body!.Data!.Id.Should().Be(created.Id);
             body.Data.FirstName.Should().Be(created.FirstName);
             body.Data.LastName.Should().Be(created.LastName);
@@ -139,7 +139,7 @@ namespace IntegrationTests.Controllers
             // ASSERT
             response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-            var body = await response.Content.ReadFromJsonAsync<ApiResponse<PatientDto>>();
+            var body = await response.Content.ReadFromJsonAsync<ApiResponse<PatientDto>>(TestJsonOptions.Default);
             body!.Success.Should().BeTrue();
             body.Data!.Id.Should().NotBeEmpty();
             body.Data.FirstName.Should().Be(dto.FirstName);
@@ -283,7 +283,7 @@ namespace IntegrationTests.Controllers
 
             // Verify the data was actually updated by fetching the patient
             var getResponse = await client.GetAsync($"{BaseUrl}/{created.Id}");
-            var body = await getResponse.Content.ReadFromJsonAsync<ApiResponse<PatientDto>>();
+            var body = await getResponse.Content.ReadFromJsonAsync<ApiResponse<PatientDto>>(TestJsonOptions.Default);
             body!.Data!.FirstName.Should().Be("Updated");
             body.Data.LastName.Should().Be("Name");
         }
@@ -407,7 +407,7 @@ namespace IntegrationTests.Controllers
         private static CreatePatientDto BuildCreatePatientDto() =>
             new()
             {
-                FirstName = $"Test_{Guid.NewGuid():N[..6]}",
+                FirstName = $"Test_{Guid.NewGuid().ToString("N")[..6]}",
                 LastName = "Patient",
                 DateOfBirth = DateTime.UtcNow.AddYears(-25),
                 Gender = Gender.Female,
@@ -427,7 +427,7 @@ namespace IntegrationTests.Controllers
             var response = await client.PostAsJsonAsync("/api/v1/patient", BuildCreatePatientDto());
             response.EnsureSuccessStatusCode();
 
-            var body = await response.Content.ReadFromJsonAsync<ApiResponse<PatientDto>>();
+            var body = await response.Content.ReadFromJsonAsync<ApiResponse<PatientDto>>(TestJsonOptions.Default);
             return body!.Data!;
         }
     }

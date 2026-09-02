@@ -14,3 +14,4 @@ global using Hospital.Application.DTOs.Patient;
 global using Hospital.Domain.Enums;
 global using Hospital.Shared.Models;
 global using IntegrationTests.Helpers;
+global using static IntegrationTests.Helpers.TestJsonOptions;

@@ -74,9 +74,7 @@ namespace Hospital.Infrastructure.Services
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null || !user.IsActive)
             {
-                // Security note: We say "Invalid credentials" for BOTH wrong email AND wrong password.
-                // Never say "Email not found" — that leaks information about registered emails.
-                throw new Exception("Invalid authentication credentials.");
+                throw new BadRequestException("Invalid authentication credentials.");
             }
 
             // Step 2: Verify password using ASP.NET Identity's secure password checker
@@ -84,7 +82,7 @@ namespace Hospital.Infrastructure.Services
             var passwordValid = await _userManager.CheckPasswordAsync(user, loginDto.Password);
             if (!passwordValid)
             {
-                throw new Exception("Invalid authentication credentials.");
+                throw new BadRequestException("Invalid authentication credentials.");
             }
 
             // Step 3: Get roles for this user — we embed roles in the JWT as claims
@@ -117,12 +115,12 @@ namespace Hospital.Infrastructure.Services
             var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
             if (existingUser != null)
             {
-                throw new Exception("A user with this email already exists.");
+                throw new BadRequestException("A user with this email already exists.");
             }
 
             if (registerDto.Password != registerDto.ConfirmPassword)
             {
-                throw new Exception("Passwords do not match.");
+                throw new BadRequestException("Passwords do not match.");
             }
 
             // Create the user — UserName = Email is a common convention
@@ -139,7 +137,7 @@ namespace Hospital.Infrastructure.Services
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new Exception($"Registration failed: {errors}");
+                throw new BadRequestException($"Registration failed: {errors}");
             }
 
             // Create the role if it doesn't exist yet, then assign it to the user
@@ -173,13 +171,13 @@ namespace Hospital.Infrastructure.Services
 
             if (existingToken == null)
             {
-                throw new Exception("Refresh token not found.");
+                throw new BadRequestException("Refresh token not found.");
             }
 
             // Check if it's still active (not revoked + not expired)
             if (!existingToken.IsActive)
             {
-                throw new Exception("Refresh token is no longer active. Please login again.");
+                throw new BadRequestException("Refresh token is no longer active. Please login again.");
             }
 
             var user = existingToken.User;
