@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core test framework -->
+    <PackageReference Include="xunit"                        Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio"    Version="3.1.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk"       Version="17.14.1" />
+
+    <!--
+      FluentAssertions — readable assertions:
+        response.StatusCode.Should().Be(HttpStatusCode.OK)
+    -->
+    <PackageReference Include="FluentAssertions"             Version="7.2.0" />
+
+    <!--
+      Microsoft.AspNetCore.Mvc.Testing — provides WebApplicationFactory<T>.
+      This is the official Microsoft package for integration testing ASP.NET Core apps.
+      It boots your real Program.cs in-process with a real HTTP pipeline.
+    -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.11" />
+
+    <!--
+      Microsoft.EntityFrameworkCore.Sqlite — the in-memory SQLite database provider.
+      We swap out SQL Server for SQLite in tests so:
+        - No SQL Server installation required on CI machines
+        - Each test class gets a clean, isolated database
+        - Tests run in milliseconds, not seconds
+      
+      NOTE: We use a NAMED SQLite in-memory database (not the EF InMemory provider)
+      because SQLite properly enforces foreign keys, cascades, and constraints —
+      the EF InMemory provider skips all of these, hiding real data integrity bugs.
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      We reference Hospital.API directly — this pulls in the entire application
+      including all layers transitively (Application, Domain, Persistence, Infrastructure, Shared).
+      
+      The API project is the integration point for everything.
+    -->
+    <ProjectReference Include="..\..\src\Hospital.API\Hospital.API.csproj" />
+  </ItemGroup>
+
+</Project>

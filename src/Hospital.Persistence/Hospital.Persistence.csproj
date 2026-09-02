@@ -9,6 +9,15 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.10" />
+    <!--
+      SQLite is included here for integration testing only.
+      PersistenceServiceRegistration reads "UseDatabase" from configuration:
+        - "SqlServer" (default, production) → UseSqlServer
+        - "Sqlite" (integration tests)      → UseSqlite
+      This avoids EF Core 9/10's dual-provider error that occurs when two
+      providers are registered via ConfigureTestServices overrides.
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.10">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

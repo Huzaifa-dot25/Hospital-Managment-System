@@ -164,3 +164,21 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INTEGRATION TEST HOOK
+//
+// WHY THIS EXISTS:
+// In .NET 6+, top-level statements in Program.cs generate an implicit internal
+// class named "Program". The integration test project (IntegrationTests.csproj)
+// is a SEPARATE assembly — it cannot access internal types.
+//
+// "partial class Program" makes the compiler merge this declaration with the
+// auto-generated one and gives us control over its accessibility.
+// "public" makes it visible to the test assembly.
+//
+// WebApplicationFactory<Program> in the test project needs to reference this
+// class to know which Program to boot. Without this line, you get:
+//   error CS0122: 'Program' is inaccessible due to its protection level
+// ─────────────────────────────────────────────────────────────────────────────
+public partial class Program { }
