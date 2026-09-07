@@ -34,6 +34,9 @@ namespace Hospital.Persistence.Contexts
         public DbSet<LabTest> LabTests { get; set; } = null!;
         public DbSet<LabOrder> LabOrders { get; set; } = null!;
         public DbSet<LabOrderItem> LabOrderItems { get; set; } = null!;
+        public DbSet<Invoice> Invoices { get; set; } = null!;
+        public DbSet<InvoiceItem> InvoiceItems { get; set; } = null!;
+        public DbSet<Payment> Payments { get; set; } = null!;
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -56,6 +59,9 @@ namespace Hospital.Persistence.Contexts
             modelBuilder.Entity<LabTest>().HasQueryFilter(lt => !lt.IsDeleted);
             modelBuilder.Entity<LabOrder>().HasQueryFilter(lo => !lo.IsDeleted);
             modelBuilder.Entity<LabOrderItem>().HasQueryFilter(loi => !loi.IsDeleted);
+            modelBuilder.Entity<Invoice>().HasQueryFilter(i => !i.IsDeleted);
+            modelBuilder.Entity<InvoiceItem>().HasQueryFilter(ii => !ii.IsDeleted);
+            modelBuilder.Entity<Payment>().HasQueryFilter(py => !py.IsDeleted);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

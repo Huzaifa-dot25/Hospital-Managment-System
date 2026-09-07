@@ -5,6 +5,7 @@ using Hospital.Application.DTOs.Patient;
 using Hospital.Application.DTOs.MedicalRecord;
 using Hospital.Application.DTOs.Pharmacy;
 using Hospital.Application.DTOs.Laboratory;
+using Hospital.Application.DTOs.Billing;
 using Hospital.Domain.Entities;
 using Hospital.Domain.Enums;
 
@@ -650,6 +651,105 @@ namespace UnitTests.Helpers
                         LabTestId = labTestId ?? Guid.NewGuid()
                     }
                 }
+            };
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // BILLING & PAYMENT BUILDERS
+        // ─────────────────────────────────────────────────────────────────────
+
+        public static Invoice CreateInvoice(
+            Guid? id = null,
+            Guid? patientId = null,
+            decimal unitPrice = 100.00m,
+            int quantity = 1,
+            decimal taxPercentage = 10.0m,
+            decimal discount = 0m)
+        {
+            var p = CreatePatient(patientId);
+            var subTotal = unitPrice * quantity;
+            var taxAmount = Math.Round(subTotal * (taxPercentage / 100m), 2);
+            var total = subTotal + taxAmount - discount;
+
+            var invoice = new Invoice
+            {
+                Id = id ?? Guid.NewGuid(),
+                InvoiceNumber = $"INV-{DateTime.UtcNow:yyyyMM}-0001",
+                PatientId = p.Id,
+                Patient = p,
+                IssueDate = DateTime.UtcNow,
+                DueDate = DateTime.UtcNow.AddDays(30),
+                SubTotal = subTotal,
+                TaxPercentage = taxPercentage,
+                TaxAmount = taxAmount,
+                DiscountAmount = discount,
+                TotalAmount = total,
+                PaidAmount = 0m,
+                Status = InvoiceStatus.Pending,
+                Notes = "Standard consultation invoice",
+                CreatedDate = DateTime.UtcNow
+            };
+
+            var item = new InvoiceItem
+            {
+                Id = Guid.NewGuid(),
+                InvoiceId = invoice.Id,
+                Invoice = invoice,
+                ItemType = BillingItemType.Consultation,
+                Description = "General Consultation",
+                UnitPrice = unitPrice,
+                Quantity = quantity,
+                TotalPrice = subTotal
+            };
+
+            invoice.Items.Add(item);
+            return invoice;
+        }
+
+        public static CreateInvoiceDto CreateInvoiceDto(
+            Guid? patientId = null,
+            decimal unitPrice = 100.00m,
+            int quantity = 1,
+            decimal taxPercentage = 10.0m,
+            decimal discount = 0m)
+        {
+            return new CreateInvoiceDto
+            {
+                PatientId = patientId ?? Guid.NewGuid(),
+                DueDate = DateTime.UtcNow.AddDays(30),
+                TaxPercentage = taxPercentage,
+                DiscountAmount = discount,
+                Notes = "Standard consultation invoice",
+                Items = new List<CreateInvoiceItemDto>
+                {
+                    new()
+                    {
+                        ItemType = BillingItemType.Consultation,
+                        Description = "General Consultation",
+                        UnitPrice = unitPrice,
+                        Quantity = quantity
+                    }
+                }
+            };
+        }
+
+        public static Payment CreatePayment(
+            Guid? id = null,
+            Guid? invoiceId = null,
+            decimal amount = 50.00m,
+            PaymentMethod method = PaymentMethod.Cash)
+        {
+            return new Payment
+            {
+                Id = id ?? Guid.NewGuid(),
+                InvoiceId = invoiceId ?? Guid.NewGuid(),
+                Amount = amount,
+                Method = method,
+                Status = PaymentStatus.Success,
+                PaymentDate = DateTime.UtcNow,
+                TransactionReference = $"TXN-{DateTime.UtcNow:yyyyMMdd}-0001",
+                Notes = "Counter payment",
+                CreatedDate = DateTime.UtcNow
             };
         }
     }

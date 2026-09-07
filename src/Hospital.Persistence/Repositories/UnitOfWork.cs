@@ -18,6 +18,8 @@ namespace Hospital.Persistence.Repositories
         private IPrescriptionRepository? _prescriptionRepository;
         private ILabTestRepository? _labTestRepository;
         private ILabOrderRepository? _labOrderRepository;
+        private IInvoiceRepository? _invoiceRepository;
+        private IPaymentRepository? _paymentRepository;
         private bool _disposed;
 
         public UnitOfWork(ApplicationDbContext dbContext)
@@ -42,6 +44,10 @@ namespace Hospital.Persistence.Repositories
         public ILabTestRepository LabTests => _labTestRepository ??= new LabTestRepository(_dbContext);
 
         public ILabOrderRepository LabOrders => _labOrderRepository ??= new LabOrderRepository(_dbContext);
+
+        public IInvoiceRepository Invoices => _invoiceRepository ??= new InvoiceRepository(_dbContext);
+
+        public IPaymentRepository Payments => _paymentRepository ??= new PaymentRepository(_dbContext);
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
