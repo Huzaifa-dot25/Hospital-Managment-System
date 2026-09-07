@@ -11,6 +11,8 @@ global using System.Net.Http.Json;
 global using Hospital.Application.DTOs.Auth;
 global using Hospital.Application.DTOs.Department;
 global using Hospital.Application.DTOs.Patient;
+global using Hospital.Application.DTOs.Doctor;
+global using Hospital.Application.DTOs.Appointment;
 global using Hospital.Domain.Enums;
 global using Hospital.Shared.Models;
 global using IntegrationTests.Helpers;
