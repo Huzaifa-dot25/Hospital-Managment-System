@@ -11,6 +11,10 @@ namespace Hospital.Domain.Repositories
         IDepartmentRepository Departments { get; }
         IAppointmentRepository Appointments { get; }
         IMedicalRecordRepository MedicalRecords { get; }
+        IMedicationRepository Medications { get; }
+        IPrescriptionRepository Prescriptions { get; }
+        ILabTestRepository LabTests { get; }
+        ILabOrderRepository LabOrders { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

@@ -3,6 +3,8 @@ using Hospital.Application.DTOs.Department;
 using Hospital.Application.DTOs.Doctor;
 using Hospital.Application.DTOs.Patient;
 using Hospital.Application.DTOs.MedicalRecord;
+using Hospital.Application.DTOs.Pharmacy;
+using Hospital.Application.DTOs.Laboratory;
 using Hospital.Domain.Entities;
 using Hospital.Domain.Enums;
 
@@ -390,6 +392,264 @@ namespace UnitTests.Helpers
                 Treatment = "Continued therapy",
                 Prescription = "Updated inhaler regimen",
                 Notes = "Patient improving"
+            };
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // PHARMACY BUILDERS
+        // ─────────────────────────────────────────────────────────────────────
+
+        public static Medication CreateMedication(
+            Guid? id = null,
+            string name = "Amoxicillin",
+            int stockQuantity = 100)
+        {
+            return new Medication
+            {
+                Id = id ?? Guid.NewGuid(),
+                Name = name,
+                GenericName = $"{name} Generic",
+                Category = "Antibiotics",
+                DosageForm = "Capsule",
+                Strength = "500mg",
+                Price = 12.50m,
+                StockQuantity = stockQuantity,
+                ExpiryDate = DateTime.UtcNow.AddYears(1),
+                Manufacturer = "PharmaCorp",
+                RequiresPrescription = true
+            };
+        }
+
+        public static CreateMedicationDto CreateMedicationDto(
+            string name = "Amoxicillin",
+            int stockQuantity = 100)
+        {
+            return new CreateMedicationDto
+            {
+                Name = name,
+                GenericName = $"{name} Generic",
+                Category = "Antibiotics",
+                DosageForm = "Capsule",
+                Strength = "500mg",
+                Price = 12.50m,
+                StockQuantity = stockQuantity,
+                ExpiryDate = DateTime.UtcNow.AddYears(1),
+                Manufacturer = "PharmaCorp",
+                RequiresPrescription = true
+            };
+        }
+
+        public static UpdateMedicationDto UpdateMedicationDto(Guid? id = null)
+        {
+            return new UpdateMedicationDto
+            {
+                Id = id ?? Guid.NewGuid(),
+                Name = "Amoxicillin 500mg (Updated)",
+                GenericName = "Amoxicillin Trihydrate",
+                Category = "Antibiotics",
+                DosageForm = "Capsule",
+                Strength = "500mg",
+                Price = 14.00m,
+                StockQuantity = 150,
+                Manufacturer = "PharmaCorp Updated",
+                RequiresPrescription = true
+            };
+        }
+
+        public static Prescription CreatePrescription(
+            Guid? id = null,
+            Guid? patientId = null,
+            Guid? doctorId = null,
+            Medication? medication = null,
+            int quantity = 21)
+        {
+            var p = CreatePatient(patientId);
+            var d = CreateDoctor(doctorId);
+            var med = medication ?? CreateMedication();
+
+            var prescription = new Prescription
+            {
+                Id = id ?? Guid.NewGuid(),
+                PatientId = p.Id,
+                Patient = p,
+                DoctorId = d.Id,
+                Doctor = d,
+                PrescriptionDate = DateTime.UtcNow,
+                Status = PrescriptionStatus.Pending,
+                Notes = "Take as prescribed"
+            };
+
+            var item = new PrescriptionItem
+            {
+                Id = Guid.NewGuid(),
+                PrescriptionId = prescription.Id,
+                Prescription = prescription,
+                MedicationId = med.Id,
+                Medication = med,
+                Dosage = "1 capsule",
+                Frequency = "3 times daily",
+                DurationInDays = 7,
+                Quantity = quantity,
+                Instructions = "Take with water after meals"
+            };
+
+            prescription.Items.Add(item);
+            return prescription;
+        }
+
+        public static CreatePrescriptionDto CreatePrescriptionDto(
+            Guid? patientId = null,
+            Guid? doctorId = null,
+            Guid? medicationId = null,
+            int quantity = 21)
+        {
+            return new CreatePrescriptionDto
+            {
+                PatientId = patientId ?? Guid.NewGuid(),
+                DoctorId = doctorId ?? Guid.NewGuid(),
+                PrescriptionDate = DateTime.UtcNow,
+                Notes = "Take as prescribed",
+                Items = new List<CreatePrescriptionItemDto>
+                {
+                    new()
+                    {
+                        MedicationId = medicationId ?? Guid.NewGuid(),
+                        Dosage = "1 capsule",
+                        Frequency = "3 times daily",
+                        DurationInDays = 7,
+                        Quantity = quantity,
+                        Instructions = "Take with water after meals"
+                    }
+                }
+            };
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // LABORATORY BUILDERS
+        // ─────────────────────────────────────────────────────────────────────
+
+        public static LabTest CreateLabTest(
+            Guid? id = null,
+            string name = "Complete Blood Count",
+            string code = "CBC-001",
+            string category = "Hematology",
+            decimal price = 45.00m)
+        {
+            return new LabTest
+            {
+                Id = id ?? Guid.NewGuid(),
+                Name = name,
+                Code = code,
+                Category = category,
+                Description = "Standard blood cell analysis",
+                Price = price,
+                TurnaroundTimeHours = 4,
+                SampleType = "Whole Blood",
+                ReferenceRange = "4.5 - 11.0 x10^3/uL",
+                Unit = "x10^3/uL",
+                CreatedDate = DateTime.UtcNow
+            };
+        }
+
+        public static CreateLabTestDto CreateLabTestDto(
+            string name = "Complete Blood Count",
+            string code = "CBC-001",
+            string category = "Hematology",
+            decimal price = 45.00m)
+        {
+            return new CreateLabTestDto
+            {
+                Name = name,
+                Code = code,
+                Category = category,
+                Description = "Standard blood cell analysis",
+                Price = price,
+                TurnaroundTimeHours = 4,
+                SampleType = "Whole Blood",
+                ReferenceRange = "4.5 - 11.0 x10^3/uL",
+                Unit = "x10^3/uL"
+            };
+        }
+
+        public static UpdateLabTestDto CreateUpdateLabTestDto(
+            Guid? id = null,
+            string name = "Complete Blood Count Updated",
+            string code = "CBC-001",
+            string category = "Hematology",
+            decimal price = 50.00m)
+        {
+            return new UpdateLabTestDto
+            {
+                Id = id ?? Guid.NewGuid(),
+                Name = name,
+                Code = code,
+                Category = category,
+                Description = "Updated blood test description",
+                Price = price,
+                TurnaroundTimeHours = 6,
+                SampleType = "Whole Blood",
+                ReferenceRange = "4.5 - 11.0 x10^3/uL",
+                Unit = "x10^3/uL"
+            };
+        }
+
+        public static LabOrder CreateLabOrder(
+            Guid? id = null,
+            Guid? patientId = null,
+            Guid? doctorId = null,
+            LabTest? labTest = null)
+        {
+            var p = CreatePatient(patientId);
+            var d = CreateDoctor(doctorId);
+            var test = labTest ?? CreateLabTest();
+
+            var order = new LabOrder
+            {
+                Id = id ?? Guid.NewGuid(),
+                PatientId = p.Id,
+                Patient = p,
+                DoctorId = d.Id,
+                Doctor = d,
+                OrderDate = DateTime.UtcNow,
+                Status = LabOrderStatus.Ordered,
+                Priority = LabOrderPriority.Routine,
+                ClinicalNotes = "Routine pre-op checkup"
+            };
+
+            var item = new LabOrderItem
+            {
+                Id = Guid.NewGuid(),
+                LabOrderId = order.Id,
+                LabOrder = order,
+                LabTestId = test.Id,
+                LabTest = test,
+                Unit = test.Unit,
+                ReferenceRange = test.ReferenceRange,
+                IsAbnormal = false
+            };
+
+            order.Items.Add(item);
+            return order;
+        }
+
+        public static CreateLabOrderDto CreateLabOrderDto(
+            Guid? patientId = null,
+            Guid? doctorId = null,
+            Guid? labTestId = null)
+        {
+            return new CreateLabOrderDto
+            {
+                PatientId = patientId ?? Guid.NewGuid(),
+                DoctorId = doctorId ?? Guid.NewGuid(),
+                Priority = LabOrderPriority.Routine,
+                ClinicalNotes = "Routine pre-op checkup",
+                Items = new List<CreateLabOrderItemDto>
+                {
+                    new()
+                    {
+                        LabTestId = labTestId ?? Guid.NewGuid()
+                    }
+                }
             };
         }
     }

@@ -28,6 +28,12 @@ namespace Hospital.Persistence.Contexts
         public DbSet<Patient> Patients { get; set; } = null!;
         public DbSet<Appointment> Appointments { get; set; } = null!;
         public DbSet<MedicalRecord> MedicalRecords { get; set; } = null!;
+        public DbSet<Medication> Medications { get; set; } = null!;
+        public DbSet<Prescription> Prescriptions { get; set; } = null!;
+        public DbSet<PrescriptionItem> PrescriptionItems { get; set; } = null!;
+        public DbSet<LabTest> LabTests { get; set; } = null!;
+        public DbSet<LabOrder> LabOrders { get; set; } = null!;
+        public DbSet<LabOrderItem> LabOrderItems { get; set; } = null!;
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -44,6 +50,12 @@ namespace Hospital.Persistence.Contexts
             modelBuilder.Entity<Department>().HasQueryFilter(d => !d.IsDeleted);
             modelBuilder.Entity<Appointment>().HasQueryFilter(a => !a.IsDeleted);
             modelBuilder.Entity<MedicalRecord>().HasQueryFilter(m => !m.IsDeleted);
+            modelBuilder.Entity<Medication>().HasQueryFilter(m => !m.IsDeleted);
+            modelBuilder.Entity<Prescription>().HasQueryFilter(p => !p.IsDeleted);
+            modelBuilder.Entity<PrescriptionItem>().HasQueryFilter(pi => !pi.IsDeleted);
+            modelBuilder.Entity<LabTest>().HasQueryFilter(lt => !lt.IsDeleted);
+            modelBuilder.Entity<LabOrder>().HasQueryFilter(lo => !lo.IsDeleted);
+            modelBuilder.Entity<LabOrderItem>().HasQueryFilter(loi => !loi.IsDeleted);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

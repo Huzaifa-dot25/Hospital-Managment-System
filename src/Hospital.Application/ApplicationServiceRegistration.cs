@@ -22,6 +22,10 @@ namespace Hospital.Application
             services.AddScoped<IPatientService, PatientService>();
             services.AddScoped<IAppointmentService, AppointmentService>();
             services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+            services.AddScoped<IMedicationService, MedicationService>();
+            services.AddScoped<IPrescriptionService, PrescriptionService>();
+            services.AddScoped<ILabTestService, LabTestService>();
+            services.AddScoped<ILabOrderService, LabOrderService>();
 
             return services;
         }

@@ -49,6 +49,10 @@ namespace Hospital.Persistence
             services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
+            services.AddScoped<IMedicationRepository, MedicationRepository>();
+            services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
+            services.AddScoped<ILabTestRepository, LabTestRepository>();
+            services.AddScoped<ILabOrderRepository, LabOrderRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
