@@ -13,6 +13,7 @@ namespace Hospital.Persistence.Repositories
         private IDoctorRepository? _doctorRepository;
         private IDepartmentRepository? _departmentRepository;
         private IAppointmentRepository? _appointmentRepository;
+        private IMedicalRecordRepository? _medicalRecordRepository;
         private bool _disposed;
 
         public UnitOfWork(ApplicationDbContext dbContext)
@@ -27,6 +28,8 @@ namespace Hospital.Persistence.Repositories
         public IDepartmentRepository Departments => _departmentRepository ??= new DepartmentRepository(_dbContext);
 
         public IAppointmentRepository Appointments => _appointmentRepository ??= new AppointmentRepository(_dbContext);
+
+        public IMedicalRecordRepository MedicalRecords => _medicalRecordRepository ??= new MedicalRecordRepository(_dbContext);
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

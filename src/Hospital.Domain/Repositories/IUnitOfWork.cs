@@ -10,6 +10,7 @@ namespace Hospital.Domain.Repositories
         IDoctorRepository Doctors { get; }
         IDepartmentRepository Departments { get; }
         IAppointmentRepository Appointments { get; }
+        IMedicalRecordRepository MedicalRecords { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

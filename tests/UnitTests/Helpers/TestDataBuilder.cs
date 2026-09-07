@@ -2,6 +2,7 @@ using Hospital.Application.DTOs.Appointment;
 using Hospital.Application.DTOs.Department;
 using Hospital.Application.DTOs.Doctor;
 using Hospital.Application.DTOs.Patient;
+using Hospital.Application.DTOs.MedicalRecord;
 using Hospital.Domain.Entities;
 using Hospital.Domain.Enums;
 
@@ -328,6 +329,67 @@ namespace UnitTests.Helpers
                 Reason = "Follow-up visit",
                 Status = AppointmentStatus.Scheduled,
                 Notes = "Patient requested earlier slot"
+            };
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // MEDICAL RECORD BUILDERS
+        // ─────────────────────────────────────────────────────────────────────
+
+        public static MedicalRecord CreateMedicalRecord(
+            Guid? id = null,
+            Guid? patientId = null,
+            Guid? doctorId = null,
+            Guid? appointmentId = null)
+        {
+            var p = CreatePatient(patientId);
+            var d = CreateDoctor(doctorId);
+            return new MedicalRecord
+            {
+                Id = id ?? Guid.NewGuid(),
+                PatientId = p.Id,
+                Patient = p,
+                DoctorId = d.Id,
+                Doctor = d,
+                AppointmentId = appointmentId,
+                RecordDate = DateTime.UtcNow,
+                Diagnosis = "Acute Bronchitis",
+                Symptoms = "Cough, fever, fatigue",
+                Treatment = "Rest, hydration, inhaler",
+                Prescription = "Amoxicillin 500mg",
+                Notes = "Follow up in 7 days"
+            };
+        }
+
+        public static CreateMedicalRecordDto CreateMedicalRecordDto(
+            Guid? patientId = null,
+            Guid? doctorId = null,
+            Guid? appointmentId = null)
+        {
+            return new CreateMedicalRecordDto
+            {
+                PatientId = patientId ?? Guid.NewGuid(),
+                DoctorId = doctorId ?? Guid.NewGuid(),
+                AppointmentId = appointmentId,
+                RecordDate = DateTime.UtcNow,
+                Diagnosis = "Acute Bronchitis",
+                Symptoms = "Cough, fever, fatigue",
+                Treatment = "Rest, hydration, inhaler",
+                Prescription = "Amoxicillin 500mg",
+                Notes = "Follow up in 7 days"
+            };
+        }
+
+        public static UpdateMedicalRecordDto UpdateMedicalRecordDto(Guid? id = null)
+        {
+            return new UpdateMedicalRecordDto
+            {
+                Id = id ?? Guid.NewGuid(),
+                Diagnosis = "Chronic Bronchitis (Updated)",
+                Symptoms = "Persistent cough",
+                Treatment = "Continued therapy",
+                Prescription = "Updated inhaler regimen",
+                Notes = "Patient improving"
             };
         }
     }

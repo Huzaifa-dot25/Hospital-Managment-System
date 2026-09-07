@@ -13,6 +13,7 @@ global using Hospital.Application.DTOs.Department;
 global using Hospital.Application.DTOs.Patient;
 global using Hospital.Application.DTOs.Doctor;
 global using Hospital.Application.DTOs.Appointment;
+global using Hospital.Application.DTOs.MedicalRecord;
 global using Hospital.Domain.Enums;
 global using Hospital.Shared.Models;
 global using IntegrationTests.Helpers;
