@@ -78,6 +78,44 @@ namespace Hospital.API.Controllers
             var result = await _authService.RefreshTokenAsync(request.Token, request.RefreshToken);
             return Ok(ApiResponse<AuthResponseDto>.SuccessResult(result, "Token refreshed successfully"));
         }
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<bool>>> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            // Extract the user ID from the JWT claims. We use the "uid" claim we set during login.
+            var userId = User.FindFirst("uid")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _authService.ChangePasswordAsync(userId, changePasswordDto);
+            return Ok(ApiResponse<bool>.SuccessResult(result, "Password changed successfully"));
+        }
+
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<bool>>> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+        {
+            var result = await _authService.ForgotPasswordAsync(forgotPasswordDto);
+            return Ok(ApiResponse<bool>.SuccessResult(result, "If the email exists, a password reset link has been sent."));
+        }
+
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<bool>>> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            var result = await _authService.ResetPasswordAsync(resetPasswordDto);
+            return Ok(ApiResponse<bool>.SuccessResult(result, "Password reset successfully"));
+        }
+
+        [HttpPost("confirm-email")]
+        [AllowAnonymous]
+        public async Task<ActionResult<ApiResponse<bool>>> ConfirmEmail([FromBody] ConfirmEmailDto confirmEmailDto)
+        {
+            var result = await _authService.ConfirmEmailAsync(confirmEmailDto);
+            return Ok(ApiResponse<bool>.SuccessResult(result, "Email confirmed successfully"));
+        }
     }
 
     /// <summary>

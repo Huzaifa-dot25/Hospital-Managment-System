@@ -43,6 +43,7 @@ namespace Hospital.Infrastructure.Services
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IValidator<LoginDto> _loginValidator;
         private readonly IValidator<RegisterDto> _registerValidator;
+        private readonly IEmailService _emailService;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
@@ -50,7 +51,8 @@ namespace Hospital.Infrastructure.Services
             IOptions<JwtOptions> jwtOptions,
             IRefreshTokenRepository refreshTokenRepository,
             IValidator<LoginDto> loginValidator,
-            IValidator<RegisterDto> registerValidator)
+            IValidator<RegisterDto> registerValidator,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -58,6 +60,7 @@ namespace Hospital.Infrastructure.Services
             _refreshTokenRepository = refreshTokenRepository;
             _loginValidator = loginValidator;
             _registerValidator = registerValidator;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -198,6 +201,79 @@ namespace Hospital.Infrastructure.Services
             await _refreshTokenRepository.SaveChangesAsync();
 
             return MapToAuthResponse(user, newJwtToken, newRefreshToken);
+        }
+
+        public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto changePasswordDto)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new KeyNotFoundException("User not found.");
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new BadRequestException($"Password change failed: {errors}");
+            }
+
+            return true;
+        }
+
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+        {
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
+            if (user == null || !user.IsActive)
+            {
+                // Return true to avoid revealing if an account exists
+                return true; 
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            
+            // In a real application, you'd generate a URL pointing to your frontend's reset page
+            var resetLink = $"https://hospital.com/reset-password?token={System.Net.WebUtility.UrlEncode(token)}&email={System.Net.WebUtility.UrlEncode(user.Email)}";
+            
+            await _emailService.SendEmailAsync(user.Email!, "Reset Password", $"Please reset your password by clicking here: {resetLink}");
+
+            return true;
+        }
+
+        public async Task<bool> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+        {
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new BadRequestException($"Password reset failed: {errors}");
+            }
+
+            return true;
+        }
+
+        public async Task<bool> ConfirmEmailAsync(ConfirmEmailDto confirmEmailDto)
+        {
+            var user = await _userManager.FindByEmailAsync(confirmEmailDto.Email);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, confirmEmailDto.Token);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new BadRequestException($"Email confirmation failed: {errors}");
+            }
+
+            return true;
         }
 
         // ─────────────────────────────────────────────────────────────

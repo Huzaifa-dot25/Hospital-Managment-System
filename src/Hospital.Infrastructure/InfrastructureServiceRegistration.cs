@@ -31,8 +31,10 @@ namespace Hospital.Infrastructure
             // Bind JwtOptions from appsettings.json
             services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
-            // Register AuthService
+            // Register Auth and User services
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IUserManagementService, UserManagementService>();
 
             // ─────────────────────────────────────────────────────────────
             // ASP.NET CORE IDENTITY CONFIGURATION
