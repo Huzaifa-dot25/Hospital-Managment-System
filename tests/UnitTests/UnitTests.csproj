@@ -18,6 +18,7 @@
       xunit.runner.visualstudio — makes tests appear in Visual Studio's Test Explorer
       Microsoft.NET.Test.Sdk — required by every .NET test project; integrates with dotnet test CLI
     -->
+    <PackageReference Include="MockQueryable.Moq" Version="10.0.12" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -49,6 +50,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!--
       We reference Hospital.Application directly because that's what we're testing.
       Hospital.Application references Hospital.Domain and Hospital.Shared transitively,
@@ -57,6 +62,8 @@
     <ProjectReference Include="..\..\src\Hospital.Application\Hospital.Application.csproj" />
     <ProjectReference Include="..\..\src\Hospital.Domain\Hospital.Domain.csproj" />
     <ProjectReference Include="..\..\src\Hospital.Shared\Hospital.Shared.csproj" />
+    <ProjectReference Include="..\..\src\Hospital.Infrastructure\Hospital.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Hospital.API\Hospital.API.csproj" />
   </ItemGroup>
 
 </Project>

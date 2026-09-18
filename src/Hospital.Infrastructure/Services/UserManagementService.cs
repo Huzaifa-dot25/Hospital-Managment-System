@@ -13,10 +13,12 @@ namespace Hospital.Infrastructure.Services
     public class UserManagementService : IUserManagementService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-        public UserManagementService(UserManager<ApplicationUser> userManager)
+        public UserManagementService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
@@ -93,6 +95,12 @@ namespace Hospital.Infrastructure.Services
             var result = await _userManager.UpdateAsync(user);
             
             return result.Succeeded;
+        }
+
+        public async Task<IEnumerable<string>> GetAllRolesAsync()
+        {
+            var roles = await _roleManager.Roles.ToListAsync();
+            return roles.Select(r => r.Name ?? string.Empty).Where(n => !string.IsNullOrEmpty(n));
         }
     }
 }

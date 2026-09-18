@@ -12,5 +12,6 @@ namespace Hospital.Application.Services.Interfaces
         Task<UserResponseDto> GetUserByIdAsync(Guid userId);
         Task<bool> UpdateUserRolesAsync(Guid userId, UpdateUserRoleDto updateUserRoleDto);
         Task<bool> ToggleUserStatusAsync(Guid userId);
+        Task<IEnumerable<string>> GetAllRolesAsync();
     }
 }

@@ -35,6 +35,8 @@ namespace Hospital.Infrastructure
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserManagementService, UserManagementService>();
+            
+            services.AddTransient<Hospital.Infrastructure.Identity.DatabaseSeeder>();
 
             // ─────────────────────────────────────────────────────────────
             // ASP.NET CORE IDENTITY CONFIGURATION

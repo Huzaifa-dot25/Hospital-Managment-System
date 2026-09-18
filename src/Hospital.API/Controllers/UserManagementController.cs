@@ -36,6 +36,14 @@ namespace Hospital.API.Controllers
             return Ok(ApiResponse<UserResponseDto>.SuccessResult(result, "User retrieved successfully"));
         }
 
+        [HttpGet("roles")]
+        [Authorize(Roles = Roles.SuperAdmin + "," + Roles.Admin)]
+        public async Task<ActionResult<ApiResponse<IEnumerable<string>>>> GetAllRoles()
+        {
+            var result = await _userManagementService.GetAllRolesAsync();
+            return Ok(ApiResponse<IEnumerable<string>>.SuccessResult(result, "Roles retrieved successfully"));
+        }
+
         [HttpPut("{id}/roles")]
         [Authorize(Roles = Roles.SuperAdmin)] // Only SuperAdmin can change roles
         public async Task<ActionResult<ApiResponse<bool>>> UpdateUserRoles(Guid id, [FromBody] UpdateUserRoleDto dto)

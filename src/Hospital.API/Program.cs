@@ -163,6 +163,21 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// ─────────────────────────────────────────────────────────────────────────────
+// RUN DATABASE SEEDER
+// Ensure roles exist in the database.
+// ─────────────────────────────────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    // Skip seeding in the Testing environment because CustomWebApplicationFactory 
+    // handles its own database creation and seeding.
+    if (!app.Environment.IsEnvironment("Testing"))
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<Hospital.Infrastructure.Identity.DatabaseSeeder>();
+        await seeder.SeedAsync();
+    }
+}
+
 app.Run();
 
 // ─────────────────────────────────────────────────────────────────────────────

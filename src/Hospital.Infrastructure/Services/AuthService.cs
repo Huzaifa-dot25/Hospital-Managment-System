@@ -143,10 +143,10 @@ namespace Hospital.Infrastructure.Services
                 throw new BadRequestException($"Registration failed: {errors}");
             }
 
-            // Create the role if it doesn't exist yet, then assign it to the user
+            // Ensure the requested role actually exists in the system
             if (!await _roleManager.RoleExistsAsync(registerDto.Role))
             {
-                await _roleManager.CreateAsync(new IdentityRole<Guid>(registerDto.Role));
+                throw new BadRequestException($"Invalid role specified: {registerDto.Role}");
             }
             await _userManager.AddToRoleAsync(user, registerDto.Role);
 
