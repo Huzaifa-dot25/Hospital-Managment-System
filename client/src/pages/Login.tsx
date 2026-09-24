@@ -1,16 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeartPulse, Mail, Lock, LogIn } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you would make an API call here.
-    // For now, we simulate a successful login by redirecting to the dashboard.
+    // Simulating API response with roles:
+    login({
+      userId: '1',
+      firstName: 'Admin',
+      lastName: 'User',
+      email: email,
+      token: 'fake-jwt-token',
+      refreshToken: 'fake-refresh-token',
+      refreshTokenExpiration: new Date().toISOString(),
+      roles: ['Admin'] // Simulate admin role login
+    });
     navigate('/');
   };
 

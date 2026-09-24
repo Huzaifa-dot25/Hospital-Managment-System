@@ -101,7 +101,7 @@ namespace Hospital.Infrastructure.Services
             await _refreshTokenRepository.AddAsync(refreshToken);
             await _refreshTokenRepository.SaveChangesAsync();
 
-            return MapToAuthResponse(user, token, refreshToken);
+            return MapToAuthResponse(user, token, refreshToken, userRoles);
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Hospital.Infrastructure.Services
             await _refreshTokenRepository.AddAsync(refreshToken);
             await _refreshTokenRepository.SaveChangesAsync();
 
-            return MapToAuthResponse(user, token, refreshToken);
+            return MapToAuthResponse(user, token, refreshToken, userRoles);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Hospital.Infrastructure.Services
             await _refreshTokenRepository.AddAsync(newRefreshToken);
             await _refreshTokenRepository.SaveChangesAsync();
 
-            return MapToAuthResponse(user, newJwtToken, newRefreshToken);
+            return MapToAuthResponse(user, newJwtToken, newRefreshToken, userRoles);
         }
 
         public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto changePasswordDto)
@@ -350,7 +350,7 @@ namespace Hospital.Infrastructure.Services
         /// <summary>
         /// Maps user + token data into the AuthResponseDto that gets returned to the client.
         /// </summary>
-        private static AuthResponseDto MapToAuthResponse(ApplicationUser user, string token, RefreshToken refreshToken)
+        private static AuthResponseDto MapToAuthResponse(ApplicationUser user, string token, RefreshToken refreshToken, IList<string> roles)
         {
             return new AuthResponseDto
             {
@@ -360,7 +360,8 @@ namespace Hospital.Infrastructure.Services
                 Email = user.Email!,
                 Token = token,
                 RefreshToken = refreshToken.Token,
-                RefreshTokenExpiration = refreshToken.Expires
+                RefreshTokenExpiration = refreshToken.Expires,
+                Roles = roles
             };
         }
     }
