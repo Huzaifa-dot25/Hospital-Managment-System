@@ -1,6 +1,5 @@
-import React from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Activity, FileText, Settings, LogOut, HeartPulse } from 'lucide-react';
+import { LayoutDashboard, Users, Activity, FileText, LogOut, HeartPulse } from 'lucide-react';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();

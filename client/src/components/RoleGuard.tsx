@@ -7,7 +7,7 @@ interface RoleGuardProps {
 }
 
 const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
-  const { isAuthenticated, hasAnyRole, user } = useAuth();
+  const { isAuthenticated, hasAnyRole } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
