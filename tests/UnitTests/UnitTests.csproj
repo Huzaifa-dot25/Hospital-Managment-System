@@ -18,7 +18,7 @@
       xunit.runner.visualstudio — makes tests appear in Visual Studio's Test Explorer
       Microsoft.NET.Test.Sdk — required by every .NET test project; integrates with dotnet test CLI
     -->
-    <PackageReference Include="MockQueryable.Moq" Version="10.0.12" />
+    <PackageReference Include="MockQueryable.Moq" Version="7.0.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

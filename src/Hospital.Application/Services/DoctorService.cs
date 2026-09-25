@@ -29,17 +29,20 @@ namespace Hospital.Application.Services
         private readonly IMapper _mapper;
         private readonly IValidator<CreateDoctorDto> _createValidator;
         private readonly IValidator<UpdateDoctorDto> _updateValidator;
+        private readonly IValidator<CreateDoctorScheduleDto> _scheduleValidator;
 
         public DoctorService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IValidator<CreateDoctorDto> createValidator,
-            IValidator<UpdateDoctorDto> updateValidator)
+            IValidator<UpdateDoctorDto> updateValidator,
+            IValidator<CreateDoctorScheduleDto> scheduleValidator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _scheduleValidator = scheduleValidator;
         }
 
         /// <inheritdoc />
@@ -125,6 +128,49 @@ namespace Hospital.Application.Services
                 throw new NotFoundException(nameof(Doctor), id);
 
             await _unitOfWork.Doctors.DeleteAsync(doctor);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<DoctorScheduleDto> AddScheduleAsync(Guid doctorId, CreateDoctorScheduleDto createScheduleDto)
+        {
+            var validationResult = await _scheduleValidator.ValidateAsync(createScheduleDto);
+            if (!validationResult.IsValid)
+                throw new AppValidationException(validationResult.Errors);
+
+            var doctor = await _unitOfWork.Doctors.GetByIdAsync(doctorId);
+            if (doctor == null)
+                throw new NotFoundException(nameof(Doctor), doctorId);
+
+            var schedule = _mapper.Map<DoctorSchedule>(createScheduleDto);
+            schedule.DoctorId = doctorId;
+
+            await _unitOfWork.DoctorSchedules.AddAsync(schedule);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<DoctorScheduleDto>(schedule);
+        }
+
+        public async Task<System.Collections.Generic.IEnumerable<DoctorScheduleDto>> GetDoctorSchedulesAsync(Guid doctorId)
+        {
+            var doctor = await _unitOfWork.Doctors.GetByIdAsync(doctorId);
+            if (doctor == null)
+                throw new NotFoundException(nameof(Doctor), doctorId);
+
+            var schedules = await _unitOfWork.DoctorSchedules.GetSchedulesByDoctorIdAsync(doctorId);
+            return _mapper.Map<System.Collections.Generic.IEnumerable<DoctorScheduleDto>>(schedules);
+        }
+
+        public async Task DeleteScheduleAsync(Guid doctorId, Guid scheduleId)
+        {
+            var doctor = await _unitOfWork.Doctors.GetByIdAsync(doctorId);
+            if (doctor == null)
+                throw new NotFoundException(nameof(Doctor), doctorId);
+
+            var schedule = await _unitOfWork.DoctorSchedules.GetByIdAsync(scheduleId);
+            if (schedule == null || schedule.DoctorId != doctorId)
+                throw new NotFoundException(nameof(DoctorSchedule), scheduleId);
+
+            await _unitOfWork.DoctorSchedules.DeleteAsync(schedule);
             await _unitOfWork.SaveChangesAsync();
         }
     }

@@ -17,6 +17,7 @@ namespace Hospital.Domain.Repositories
         ILabOrderRepository LabOrders { get; }
         IInvoiceRepository Invoices { get; }
         IPaymentRepository Payments { get; }
+        IDoctorScheduleRepository DoctorSchedules { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

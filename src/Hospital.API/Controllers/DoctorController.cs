@@ -80,5 +80,30 @@ namespace Hospital.API.Controllers
             await _doctorService.DeleteDoctorAsync(id);
             return Ok(ApiResponse.SuccessResult("Doctor deleted successfully"));
         }
+
+        [HttpPost("{id:guid}/schedule")]
+        [Authorize(Roles = Roles.AdminAndAbove + "," + Roles.Doctor)]
+        public async Task<ActionResult<ApiResponse<DoctorScheduleDto>>> AddSchedule(
+            Guid id, [FromBody] CreateDoctorScheduleDto createScheduleDto)
+        {
+            var schedule = await _doctorService.AddScheduleAsync(id, createScheduleDto);
+            return Ok(ApiResponse<DoctorScheduleDto>.SuccessResult(schedule, "Schedule added successfully"));
+        }
+
+        [HttpGet("{id:guid}/schedule")]
+        [Authorize(Roles = $"{Roles.SuperAdmin},{Roles.Admin},{Roles.Doctor},{Roles.Receptionist},{Roles.Patient}")]
+        public async Task<ActionResult<ApiResponse<System.Collections.Generic.IEnumerable<DoctorScheduleDto>>>> GetSchedules(Guid id)
+        {
+            var schedules = await _doctorService.GetDoctorSchedulesAsync(id);
+            return Ok(ApiResponse<System.Collections.Generic.IEnumerable<DoctorScheduleDto>>.SuccessResult(schedules, "Schedules retrieved successfully"));
+        }
+
+        [HttpDelete("{id:guid}/schedule/{scheduleId:guid}")]
+        [Authorize(Roles = Roles.AdminAndAbove + "," + Roles.Doctor)]
+        public async Task<ActionResult<ApiResponse>> DeleteSchedule(Guid id, Guid scheduleId)
+        {
+            await _doctorService.DeleteScheduleAsync(id, scheduleId);
+            return Ok(ApiResponse.SuccessResult("Schedule deleted successfully"));
+        }
     }
 }

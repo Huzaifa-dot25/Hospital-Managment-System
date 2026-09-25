@@ -25,6 +25,7 @@ namespace Hospital.Persistence.Contexts
 
         public DbSet<Department> Departments { get; set; } = null!;
         public DbSet<Doctor> Doctors { get; set; } = null!;
+        public DbSet<DoctorSchedule> DoctorSchedules { get; set; } = null!;
         public DbSet<Patient> Patients { get; set; } = null!;
         public DbSet<Appointment> Appointments { get; set; } = null!;
         public DbSet<MedicalRecord> MedicalRecords { get; set; } = null!;
@@ -50,6 +51,7 @@ namespace Hospital.Persistence.Contexts
             // Global query filter to automatically filter out soft-deleted entities
             modelBuilder.Entity<Patient>().HasQueryFilter(p => !p.IsDeleted);
             modelBuilder.Entity<Doctor>().HasQueryFilter(d => !d.IsDeleted);
+            modelBuilder.Entity<DoctorSchedule>().HasQueryFilter(ds => !ds.IsDeleted);
             modelBuilder.Entity<Department>().HasQueryFilter(d => !d.IsDeleted);
             modelBuilder.Entity<Appointment>().HasQueryFilter(a => !a.IsDeleted);
             modelBuilder.Entity<MedicalRecord>().HasQueryFilter(m => !m.IsDeleted);

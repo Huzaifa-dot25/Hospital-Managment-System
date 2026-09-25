@@ -2,6 +2,7 @@ using Hospital.Application.DTOs.Doctor;
 using Hospital.Shared.Models;
 using Hospital.Shared.Queries;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Hospital.Application.Services.Interfaces
@@ -28,5 +29,14 @@ namespace Hospital.Application.Services.Interfaces
 
         /// <summary>Soft-deletes a doctor.</summary>
         Task DeleteDoctorAsync(Guid id);
+
+        /// <summary>Adds a working schedule to a doctor.</summary>
+        Task<DoctorScheduleDto> AddScheduleAsync(Guid doctorId, CreateDoctorScheduleDto createScheduleDto);
+
+        /// <summary>Gets all schedules for a doctor.</summary>
+        Task<IEnumerable<DoctorScheduleDto>> GetDoctorSchedulesAsync(Guid doctorId);
+
+        /// <summary>Removes a schedule.</summary>
+        Task DeleteScheduleAsync(Guid doctorId, Guid scheduleId);
     }
 }

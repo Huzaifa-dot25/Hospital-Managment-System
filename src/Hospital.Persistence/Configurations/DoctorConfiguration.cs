@@ -31,6 +31,15 @@ namespace Hospital.Persistence.Configurations
             builder.Property(d => d.ContactNumber)
                 .HasMaxLength(20);
 
+            builder.Property(d => d.Bio)
+                .HasMaxLength(1000);
+
+            builder.Property(d => d.ConsultationFee)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Property(d => d.ProfilePictureUrl)
+                .HasMaxLength(500);
+
             builder.Property(d => d.DepartmentId)
                 .IsRequired();
         }

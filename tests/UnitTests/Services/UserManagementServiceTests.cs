@@ -2,6 +2,7 @@ using FluentAssertions;
 using Hospital.Domain.Entities.Identity;
 using Hospital.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
+using MockQueryable;
 using MockQueryable.Moq;
 using Moq;
 using System;
@@ -37,7 +38,7 @@ namespace UnitTests.Services
             }.AsQueryable();
 
             var mockRolesQueryable = roles.BuildMock();
-            _mockRoleManager.Setup(x => x.Roles).Returns(mockRolesQueryable.Object);
+            _mockRoleManager.Setup(x => x.Roles).Returns(mockRolesQueryable);
 
             // ACT
             var result = await _sut.GetAllRolesAsync();

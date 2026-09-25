@@ -10,6 +10,9 @@ namespace Hospital.Application.DTOs.Doctor
         public string LicenseNumber { get; set; } = string.Empty;
         public int YearsOfExperience { get; set; }
         public string ContactNumber { get; set; } = string.Empty;
+        public string Bio { get; set; } = string.Empty;
+        public decimal ConsultationFee { get; set; }
+        public string ProfilePictureUrl { get; set; } = string.Empty;
         public Guid DepartmentId { get; set; }
     }
 }

@@ -12,6 +12,9 @@ namespace Hospital.Application.Mappings
                 .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department.Name));
             CreateMap<CreateDoctorDto, Doctor>();
             CreateMap<UpdateDoctorDto, Doctor>();
+
+            CreateMap<DoctorSchedule, DoctorScheduleDto>();
+            CreateMap<CreateDoctorScheduleDto, DoctorSchedule>();
         }
     }
 }
