@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import Billing from './pages/Billing';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import RoleGuard from './components/RoleGuard';
 
@@ -42,7 +43,7 @@ function App() {
             </Route>
             
             <Route element={<RoleGuard allowedRoles={['Admin', 'Accountant', 'Cashier']} />}>
-              <Route path="billing" element={<div className="p-4">Billing Page coming soon...</div>} />
+              <Route path="billing" element={<Billing />} />
             </Route>
           </Route>
         </Routes>
