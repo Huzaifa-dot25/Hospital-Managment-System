@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   FileText, 
   DollarSign, 
@@ -17,24 +18,52 @@ interface Invoice {
   patientName: string;
   amount: number;
   date: string;
-  status: 'Paid' | 'Pending' | 'Cancelled';
+  status: 'Paid' | 'Pending' | 'Cancelled' | string;
 }
-
-const DUMMY_INVOICES: Invoice[] = [
-  { id: '1', invoiceNumber: 'INV-2026-001', patientName: 'John Doe', amount: 150.0, date: '2026-09-28', status: 'Paid' },
-  { id: '2', invoiceNumber: 'INV-2026-002', patientName: 'Jane Smith', amount: 450.5, date: '2026-09-29', status: 'Pending' },
-  { id: '3', invoiceNumber: 'INV-2026-003', patientName: 'Robert Johnson', amount: 85.0, date: '2026-09-29', status: 'Pending' },
-  { id: '4', invoiceNumber: 'INV-2026-004', patientName: 'Emily Davis', amount: 320.0, date: '2026-09-25', status: 'Cancelled' },
-  { id: '5', invoiceNumber: 'INV-2026-005', patientName: 'Michael Brown', amount: 1200.0, date: '2026-09-27', status: 'Paid' },
-];
 
 const Billing = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredInvoices = DUMMY_INVOICES.filter(inv => 
-    inv.patientName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    inv.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5168/api/v1/Invoice', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        const fetchedInvoices = response.data.map((inv: any) => ({
+          id: inv.id,
+          invoiceNumber: inv.invoiceNumber,
+          patientName: inv.patientName,
+          amount: inv.totalAmount || 0,
+          date: inv.issueDate ? new Date(inv.issueDate).toISOString().split('T')[0] : '',
+          status: inv.status || 'Pending'
+        }));
+        
+        setInvoices(fetchedInvoices);
+      } catch (error) {
+        console.error('Failed to fetch invoices:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInvoices();
+  }, []);
+
+  const filteredInvoices = invoices.filter(inv => 
+    inv.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    inv.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalRevenue = invoices.filter(i => i.status === 'Paid').reduce((sum, i) => sum + i.amount, 0);
+  const pendingAmount = invoices.filter(i => i.status === 'Pending').reduce((sum, i) => sum + i.amount, 0);
+  const invoicesCount = invoices.length;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -93,7 +122,7 @@ const Billing = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">$24,500</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
             </div>
           </div>
         </div>
@@ -106,7 +135,7 @@ const Billing = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Amount</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">$3,240</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">${pendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
             </div>
           </div>
         </div>
@@ -119,7 +148,7 @@ const Billing = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Invoices Generated</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">142</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{invoicesCount}</h3>
             </div>
           </div>
         </div>

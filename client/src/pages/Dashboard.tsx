@@ -1,6 +1,48 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Users, Activity, FileText, Plus } from 'lucide-react';
 
 export default function Dashboard() {
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [todayAppointments, setTodayAppointments] = useState(0);
+  const [pendingInvoices, setPendingInvoices] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = { Authorization: `Bearer ${token}` };
+        
+        // Fetching all three in parallel, catching individual errors so one failure doesn't break the whole dashboard
+        const [patientsRes, apptsRes, invoicesRes] = await Promise.all([
+          axios.get('http://localhost:5168/api/v1/Patient', { headers }).catch(() => ({ data: [] })),
+          axios.get('http://localhost:5168/api/v1/Appointment', { headers }).catch(() => ({ data: [] })),
+          axios.get('http://localhost:5168/api/v1/Invoice', { headers }).catch(() => ({ data: [] }))
+        ]);
+
+        setTotalPatients(patientsRes.data?.length || 0);
+        
+        const today = new Date().toISOString().split('T')[0];
+        const todayCount = (apptsRes.data || []).filter((a: any) => {
+          // Check common date fields for appointment
+          const dateStr = a.appointmentDate || a.date || a.scheduledAt || '';
+          return dateStr.startsWith(today);
+        }).length;
+        setTodayAppointments(todayCount);
+
+        const pendingCount = (invoicesRes.data || []).filter((i: any) => i.status === 'Pending').length;
+        setPendingInvoices(pendingCount);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -27,7 +69,7 @@ export default function Dashboard() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Total Patients</dt>
-                  <dd className="text-2xl font-semibold text-gray-900">1,248</dd>
+                  <dd className="text-2xl font-semibold text-gray-900">{loading ? '...' : totalPatients}</dd>
                 </dl>
               </div>
             </div>
@@ -51,7 +93,7 @@ export default function Dashboard() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Today's Appointments</dt>
-                  <dd className="text-2xl font-semibold text-gray-900">42</dd>
+                  <dd className="text-2xl font-semibold text-gray-900">{loading ? '...' : todayAppointments}</dd>
                 </dl>
               </div>
             </div>
@@ -75,7 +117,7 @@ export default function Dashboard() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Pending Invoices</dt>
-                  <dd className="text-2xl font-semibold text-gray-900">18</dd>
+                  <dd className="text-2xl font-semibold text-gray-900">{loading ? '...' : pendingInvoices}</dd>
                 </dl>
               </div>
             </div>
