@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { 
   FileText, 
   DollarSign, 
@@ -24,27 +24,26 @@ interface Invoice {
 const Billing = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5168/api/v1/Invoice', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        const fetchedInvoices = response.data.map((inv: any) => ({
+        const response = await api.get('/Invoice');
+
+        // Backend: ApiResponse<PagedResponse<InvoiceDto>>
+        // → response.data.data.items = InvoiceDto[]
+        const items: any[] = response.data?.data?.items ?? [];
+
+        const fetchedInvoices = items.map((inv: any) => ({
           id: inv.id,
           invoiceNumber: inv.invoiceNumber,
           patientName: inv.patientName,
-          amount: inv.totalAmount || 0,
+          amount: inv.totalAmount ?? 0,
           date: inv.issueDate ? new Date(inv.issueDate).toISOString().split('T')[0] : '',
-          status: inv.status || 'Pending'
+          status: inv.status ?? 'Pending',
         }));
-        
+
         setInvoices(fetchedInvoices);
       } catch (error) {
         console.error('Failed to fetch invoices:', error);

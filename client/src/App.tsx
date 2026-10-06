@@ -4,6 +4,8 @@ import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Billing from './pages/Billing';
+import Patients from './pages/Patients';
+import Appointments from './pages/Appointments';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import RoleGuard from './components/RoleGuard';
 
@@ -35,11 +37,11 @@ function App() {
             
             {/* Example of Role-Based Route Guards */}
             <Route element={<RoleGuard allowedRoles={['Admin', 'Doctor', 'Nurse', 'Receptionist']} />}>
-              <Route path="patients" element={<div className="p-4">Patients Page coming soon...</div>} />
+              <Route path="patients" element={<Patients />} />
             </Route>
             
             <Route element={<RoleGuard allowedRoles={['Admin', 'Doctor', 'Receptionist']} />}>
-              <Route path="appointments" element={<div className="p-4">Appointments Page coming soon...</div>} />
+              <Route path="appointments" element={<Appointments />} />
             </Route>
             
             <Route element={<RoleGuard allowedRoles={['Admin', 'Accountant', 'Cashier']} />}>

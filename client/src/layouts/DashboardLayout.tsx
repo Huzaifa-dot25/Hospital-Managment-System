@@ -1,13 +1,26 @@
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, Activity, FileText, LogOut, HeartPulse } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { logout, user } = useAuth();
 
   const handleLogout = () => {
-    // Basic logout logic to navigate back to login
+    logout();
     navigate('/login');
   };
+
+  const navItems = [
+    { to: '/',             label: 'Dashboard',    icon: LayoutDashboard },
+    { to: '/patients',     label: 'Patients',     icon: Users           },
+    { to: '/appointments', label: 'Appointments', icon: Activity        },
+    { to: '/billing',      label: 'Billing',      icon: FileText        },
+  ];
+
+  const isActive = (path: string) =>
+    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -20,30 +33,25 @@ export default function DashboardLayout() {
         
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-3">
-            <li>
-              <Link to="/" className="flex items-center px-3 py-2.5 bg-blue-50 text-blue-700 rounded-lg group transition-colors">
-                <LayoutDashboard className="h-5 w-5 mr-3" />
-                <span className="font-medium">Dashboard</span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/patients" className="flex items-center px-3 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg group transition-colors">
-                <Users className="h-5 w-5 mr-3 text-gray-400 group-hover:text-gray-600" />
-                <span className="font-medium">Patients</span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/appointments" className="flex items-center px-3 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg group transition-colors">
-                <Activity className="h-5 w-5 mr-3 text-gray-400 group-hover:text-gray-600" />
-                <span className="font-medium">Appointments</span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/billing" className="flex items-center px-3 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg group transition-colors">
-                <FileText className="h-5 w-5 mr-3 text-gray-400 group-hover:text-gray-600" />
-                <span className="font-medium">Billing</span>
-              </Link>
-            </li>
+            {navItems.map(({ to, label, icon: Icon }) => (
+              <li key={to}>
+                <Link
+                  to={to}
+                  className={`flex items-center px-3 py-2.5 rounded-lg group transition-colors ${
+                    isActive(to)
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon
+                    className={`h-5 w-5 mr-3 ${
+                      isActive(to) ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+                    }`}
+                  />
+                  <span className="font-medium">{label}</span>
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
         
@@ -66,9 +74,11 @@ export default function DashboardLayout() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
-                A
+                {user?.firstName?.[0]?.toUpperCase() ?? 'U'}
               </div>
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">Admin User</span>
+              <span className="text-sm font-medium text-gray-700 hidden sm:block">
+                {user ? `${user.firstName} ${user.lastName}` : 'User'}
+              </span>
             </div>
           </div>
         </header>

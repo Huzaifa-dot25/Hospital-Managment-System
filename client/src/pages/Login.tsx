@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HeartPulse, Mail, Lock, LogIn } from 'lucide-react';
+import { HeartPulse, Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would make an API call here.
-    // Simulating API response with roles:
-    login({
-      userId: '1',
-      firstName: 'Admin',
-      lastName: 'User',
-      email: email,
-      token: 'fake-jwt-token',
-      refreshToken: 'fake-refresh-token',
-      refreshTokenExpiration: new Date().toISOString(),
-      roles: ['Admin'] // Simulate admin role login
-    });
-    navigate('/');
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await axios.post('http://localhost:5168/api/v1/Auth/login', {
+        email,
+        password,
+      });
+
+      // The API wraps its response in ApiResponse<T>, so the auth data lives at data.data
+      const authData = response.data?.data ?? response.data;
+      login(authData);
+      navigate('/');
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.title ||
+        'Invalid email or password. Please try again.';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,6 +56,12 @@ export default function Login() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-xl shadow-blue-900/5 sm:rounded-2xl sm:px-10 border border-gray-100">
+          {error && (
+            <div className="mb-4 flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -112,10 +130,18 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                disabled={loading}
+                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <LogIn className="h-5 w-5 mr-2" />
-                Sign in
+                {loading ? (
+                  <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                ) : (
+                  <LogIn className="h-5 w-5 mr-2" />
+                )}
+                {loading ? 'Signing in…' : 'Sign in'}
               </button>
             </div>
           </form>

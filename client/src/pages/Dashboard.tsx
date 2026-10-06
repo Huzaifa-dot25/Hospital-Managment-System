@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Users, Activity, FileText, Plus } from 'lucide-react';
 
 export default function Dashboard() {
@@ -11,27 +11,30 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
-        
-        // Fetching all three in parallel, catching individual errors so one failure doesn't break the whole dashboard
+        // All three in parallel; individual failures don't break the whole dashboard
         const [patientsRes, apptsRes, invoicesRes] = await Promise.all([
-          axios.get('http://localhost:5168/api/v1/Patient', { headers }).catch(() => ({ data: [] })),
-          axios.get('http://localhost:5168/api/v1/Appointment', { headers }).catch(() => ({ data: [] })),
-          axios.get('http://localhost:5168/api/v1/Invoice', { headers }).catch(() => ({ data: [] }))
+          api.get('/Patient').catch(() => ({ data: null })),
+          api.get('/Appointment').catch(() => ({ data: null })),
+          api.get('/Invoice').catch(() => ({ data: null })),
         ]);
 
-        setTotalPatients(patientsRes.data?.length || 0);
-        
+        // Backend shape: ApiResponse<PagedResponse<T>>
+        // → response.data        = ApiResponse wrapper  { data: PagedResponse }
+        // → response.data.data   = PagedResponse         { items: T[], totalCount }
+        const patients   = patientsRes.data?.data?.items   ?? [];
+        const appts      = apptsRes.data?.data?.items      ?? [];
+        const invoices   = invoicesRes.data?.data?.items   ?? [];
+
+        setTotalPatients(patientsRes.data?.data?.totalCount ?? patients.length);
+
         const today = new Date().toISOString().split('T')[0];
-        const todayCount = (apptsRes.data || []).filter((a: any) => {
-          // Check common date fields for appointment
+        const todayCount = appts.filter((a: any) => {
           const dateStr = a.appointmentDate || a.date || a.scheduledAt || '';
           return dateStr.startsWith(today);
         }).length;
         setTodayAppointments(todayCount);
 
-        const pendingCount = (invoicesRes.data || []).filter((i: any) => i.status === 'Pending').length;
+        const pendingCount = invoices.filter((i: any) => i.status === 'Pending').length;
         setPendingInvoices(pendingCount);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
