@@ -6,6 +6,12 @@ import Login from './pages/Login';
 import Billing from './pages/Billing';
 import Patients from './pages/Patients';
 import Appointments from './pages/Appointments';
+import Doctors from './pages/Doctors';
+import Departments from './pages/Departments';
+import MedicalRecords from './pages/MedicalRecords';
+import Prescriptions from './pages/Prescriptions';
+import LabOrders from './pages/LabOrders';
+import UserManagement from './pages/UserManagement';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import RoleGuard from './components/RoleGuard';
 
@@ -46,6 +52,30 @@ function App() {
             
             <Route element={<RoleGuard allowedRoles={['Admin', 'Accountant', 'Cashier']} />}>
               <Route path="billing" element={<Billing />} />
+            </Route>
+
+            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin', 'Doctor', 'Receptionist', 'Nurse']} />}>
+              <Route path="doctors" element={<Doctors />} />
+            </Route>
+
+            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin']} />}>
+              <Route path="departments" element={<Departments />} />
+            </Route>
+
+            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin', 'Doctor', 'Nurse']} />}>
+              <Route path="medical-records" element={<MedicalRecords />} />
+            </Route>
+
+            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin', 'Doctor', 'Nurse', 'Pharmacist']} />}>
+              <Route path="prescriptions" element={<Prescriptions />} />
+            </Route>
+
+            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin', 'Doctor', 'Nurse', 'LabTechnician']} />}>
+              <Route path="lab-orders" element={<LabOrders />} />
+            </Route>
+
+            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin']} />}>
+              <Route path="users" element={<UserManagement />} />
             </Route>
           </Route>
         </Routes>

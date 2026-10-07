@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Activity, FileText, LogOut, HeartPulse } from 'lucide-react';
+import { LayoutDashboard, Users, Activity, FileText, LogOut, HeartPulse, Stethoscope, Building2, ClipboardList, Pill, FlaskConical, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function DashboardLayout() {
@@ -13,10 +13,16 @@ export default function DashboardLayout() {
   };
 
   const navItems = [
-    { to: '/',             label: 'Dashboard',    icon: LayoutDashboard },
-    { to: '/patients',     label: 'Patients',     icon: Users           },
-    { to: '/appointments', label: 'Appointments', icon: Activity        },
-    { to: '/billing',      label: 'Billing',      icon: FileText        },
+    { to: '/',                label: 'Dashboard',       icon: LayoutDashboard },
+    { to: '/patients',        label: 'Patients',        icon: Users           },
+    { to: '/appointments',    label: 'Appointments',    icon: Activity        },
+    { to: '/billing',         label: 'Billing',         icon: FileText        },
+    { to: '/medical-records', label: 'Medical Records', icon: ClipboardList   },
+    { to: '/prescriptions',   label: 'Prescriptions',   icon: Pill            },
+    { to: '/lab-orders',      label: 'Lab Orders',      icon: FlaskConical    },
+    { to: '/doctors',         label: 'Doctors',         icon: Stethoscope     },
+    { to: '/departments',     label: 'Departments',     icon: Building2       },
+    { to: '/users',           label: 'Users',           icon: ShieldCheck     },
   ];
 
   const isActive = (path: string) =>
