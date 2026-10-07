@@ -2,10 +2,11 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, Activity, FileText, LogOut, HeartPulse, Stethoscope, Building2, ClipboardList, Pill, FlaskConical, ShieldCheck, Receipt } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
+
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, user } = useAuth();
+  const { logout, user, hasAnyRole } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -16,14 +17,13 @@ export default function DashboardLayout() {
     { to: '/',                label: 'Dashboard',       icon: LayoutDashboard },
     { to: '/patients',        label: 'Patients',        icon: Users           },
     { to: '/appointments',    label: 'Appointments',    icon: Activity        },
-    { to: '/billing',         label: 'Billing',         icon: FileText        },
+    { to: '/doctors',         label: 'Doctors',         icon: Stethoscope     },
+    { to: '/departments',     label: 'Departments',     icon: Building2       },
     { to: '/medical-records', label: 'Medical Records', icon: ClipboardList   },
     { to: '/prescriptions',   label: 'Prescriptions',   icon: Pill            },
     { to: '/lab-orders',      label: 'Lab Orders',      icon: FlaskConical    },
     { to: '/medications',     label: 'Medications',     icon: Receipt         },
-    { to: '/doctors',         label: 'Doctors',         icon: Stethoscope     },
-    { to: '/departments',     label: 'Departments',     icon: Building2       },
-    { to: '/users',           label: 'Users',           icon: ShieldCheck     },
+    { to: '/billing',         label: 'Billing',         icon: FileText        },
   ];
 
   const isActive = (path: string) =>
@@ -59,6 +59,26 @@ export default function DashboardLayout() {
                 </Link>
               </li>
             ))}
+            {/* Users link — only visible to Admin / SuperAdmin */}
+            {hasAnyRole(['Admin', 'SuperAdmin']) && (
+              <li>
+                <Link
+                  to="/users"
+                  className={`flex items-center px-3 py-2.5 rounded-lg group transition-colors ${
+                    isActive('/users')
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <ShieldCheck
+                    className={`h-5 w-5 mr-3 ${
+                      isActive('/users') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+                    }`}
+                  />
+                  <span className="font-medium">Users</span>
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
         

@@ -59,7 +59,7 @@ function App() {
               <Route path="doctors" element={<Doctors />} />
             </Route>
 
-            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin']} />}>
+            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin', 'Doctor', 'Nurse', 'Receptionist']} />}>
               <Route path="departments" element={<Departments />} />
             </Route>
 
@@ -79,7 +79,7 @@ function App() {
               <Route path="users" element={<UserManagement />} />
             </Route>
 
-            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin', 'Doctor', 'Nurse', 'Pharmacist', 'Receptionist', 'LabTechnician']} />}>
+            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin', 'Doctor', 'Nurse', 'Pharmacist', 'Receptionist', 'LabTechnician', 'Radiologist', 'Cashier', 'Accountant']} />}>
               <Route path="medications" element={<Medications />} />
             </Route>
           </Route>

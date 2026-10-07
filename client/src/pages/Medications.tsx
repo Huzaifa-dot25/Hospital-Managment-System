@@ -84,7 +84,6 @@ const Medications = () => {
         pageNumber: currentPage,
         pageSize: PAGE_SIZE,
       };
-      if (debouncedSearch) params.search = debouncedSearch;
 
       const res = await api.get('/Medication', { params });
       const paged = res.data?.data;
@@ -95,7 +94,7 @@ const Medications = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, debouncedSearch]);
+  }, [currentPage]);
 
   useEffect(() => {
     fetchMedications();
@@ -145,6 +144,16 @@ const Medications = () => {
       setSubmitting(false);
     }
   };
+
+  // ── Client-side search filter (applied to the loaded page) ──────────────────
+  const filteredMedications = debouncedSearch
+    ? medications.filter(
+        (m) =>
+          m.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+          m.genericName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+          m.category.toLowerCase().includes(debouncedSearch.toLowerCase()),
+      )
+    : medications;
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
@@ -210,7 +219,7 @@ const Medications = () => {
                     <Loader2 className="w-6 h-6 text-blue-500 animate-spin mx-auto" />
                   </td>
                 </tr>
-              ) : medications.length === 0 ? (
+              ) : filteredMedications.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                     <div className="flex flex-col items-center gap-3">
@@ -220,7 +229,7 @@ const Medications = () => {
                   </td>
                 </tr>
               ) : (
-                medications.map((med, idx) => (
+                filteredMedications.map((med, idx) => (
                   <tr
                     key={med.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
