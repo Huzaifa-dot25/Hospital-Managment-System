@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Activity, FileText, LogOut, HeartPulse, Stethoscope, Building2, ClipboardList, Pill, FlaskConical, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, Activity, FileText, LogOut, HeartPulse, Stethoscope, Building2, ClipboardList, Pill, FlaskConical, ShieldCheck, Receipt } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function DashboardLayout() {
@@ -20,6 +20,7 @@ export default function DashboardLayout() {
     { to: '/medical-records', label: 'Medical Records', icon: ClipboardList   },
     { to: '/prescriptions',   label: 'Prescriptions',   icon: Pill            },
     { to: '/lab-orders',      label: 'Lab Orders',      icon: FlaskConical    },
+    { to: '/medications',     label: 'Medications',     icon: Receipt         },
     { to: '/doctors',         label: 'Doctors',         icon: Stethoscope     },
     { to: '/departments',     label: 'Departments',     icon: Building2       },
     { to: '/users',           label: 'Users',           icon: ShieldCheck     },

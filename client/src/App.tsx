@@ -12,6 +12,7 @@ import MedicalRecords from './pages/MedicalRecords';
 import Prescriptions from './pages/Prescriptions';
 import LabOrders from './pages/LabOrders';
 import UserManagement from './pages/UserManagement';
+import Medications from './pages/Medications';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import RoleGuard from './components/RoleGuard';
 
@@ -76,6 +77,10 @@ function App() {
 
             <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin']} />}>
               <Route path="users" element={<UserManagement />} />
+            </Route>
+
+            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin', 'Doctor', 'Nurse', 'Pharmacist', 'Receptionist', 'LabTechnician']} />}>
+              <Route path="medications" element={<Medications />} />
             </Route>
           </Route>
         </Routes>
