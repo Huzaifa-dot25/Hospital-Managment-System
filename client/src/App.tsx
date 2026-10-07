@@ -55,7 +55,7 @@ function App() {
               <Route path="billing" element={<Billing />} />
             </Route>
 
-            <Route element={<RoleGuard allowedRoles={['Admin', 'SuperAdmin', 'Doctor', 'Receptionist', 'Nurse']} />}>
+            <Route element={<RoleGuard allowedRoles={['SuperAdmin', 'Admin', 'Doctor', 'Receptionist', 'Nurse']} />}>
               <Route path="doctors" element={<Doctors />} />
             </Route>
 

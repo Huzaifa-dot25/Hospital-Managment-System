@@ -84,7 +84,6 @@ const Medications = () => {
         pageNumber: currentPage,
         pageSize: PAGE_SIZE,
       };
-
       const res = await api.get('/Medication', { params });
       const paged = res.data?.data;
       setMedications(paged?.items ?? []);
@@ -535,3 +534,5 @@ const Medications = () => {
 };
 
 export default Medications;
+
+

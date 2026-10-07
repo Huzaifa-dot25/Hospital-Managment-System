@@ -1,0 +1,30 @@
+{
+  "verdict": "CHANGES_REQUESTED",
+  "findings": [
+    {
+      "id": "doctors-role-guard",
+      "label": "Doctors route guard includes SuperAdmin",
+      "description": "App.tsx grants SuperAdmin access to /doctors, but the plan specifies only ['Admin', 'Doctor', 'Nurse', 'Receptionist']. Remove SuperAdmin from that guard to match the spec, or confirm the deviation is intentional.",
+      "severity": "minor",
+      "file": "client/src/App.tsx",
+      "confirmed": true
+    },
+    {
+      "id": "prescriptions-empty-items",
+      "label": "Prescriptions allows zero-item POST",
+      "description": "handleSubmit in Prescriptions.tsx validates per-item medicationId but does not check form.items.length === 0 before submitting. The plan requires a minimum of 1 item. Add: if (form.items.length === 0) { setFormError('Add at least one medication item.'); return; } before the per-item validation.",
+      "severity": "blocking",
+      "file": "client/src/pages/Prescriptions.tsx",
+      "confirmed": true
+    },
+    {
+      "id": "medications-search-scope",
+      "label": "Medications search only scans the current page",
+      "description": "fetchMedications does not include debouncedSearch in its useCallback dependency array and never passes it as params.search to the backend. Search silently filters only the 10 items on the current page. Either add debouncedSearch to deps and pass it as a backend param, or document that client-side page filtering is the intended behavior.",
+      "severity": "minor",
+      "file": "client/src/pages/Medications.tsx",
+      "confirmed": true
+    }
+  ],
+  "reviewDoc": "c:\\Users\\user\\Desktop\\Hospital Managment System\\.agents\\tasks\\phase2-review.md"
+}

@@ -232,6 +232,10 @@ const Prescriptions = () => {
       setFormError('Please select both a patient and a doctor.');
       return;
     }
+    if (form.items.length === 0) {
+      setFormError('Add at least one medication item.');
+      return;
+    }
     if (form.items.some((item) => !item.medicationId)) {
       setFormError('Please select a medication for each item row.');
       return;
