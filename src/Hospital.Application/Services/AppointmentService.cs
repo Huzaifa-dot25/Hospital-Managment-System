@@ -18,7 +18,7 @@ namespace Hospital.Application.Services
     /// Implements all Appointment use cases.
     ///
     /// Appointments are the core of a hospital management system.
-    /// Every appointment links one Patient to one Doctor at a specific date/time.
+    /// Every appointment links one Patient to one Doctor at a specific date/time.   
     ///
     /// Business rules enforced here:
     ///   - Both PatientId and DoctorId must reference existing records

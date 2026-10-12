@@ -1,0 +1,16 @@
+﻿const fs = require("fs");
+const lines = [];
+lines.push("import { useState, useEffect, useCallback } from " + JSON.stringify("react") + ";");
+lines.push("import { Link } from " + JSON.stringify("react-router-dom") + ";");
+lines.push("import api from " + JSON.stringify("../services/api") + ";");
+lines.push("import { Users, Activity, FileText, Plus, CalendarDays, Receipt, Clock, CheckCircle, XCircle, Loader2, ArrowRight } from " + JSON.stringify("lucide-react") + ";");
+lines.push("");
+lines.push("interface RecentAppointment { id: string; patientName: string; doctorName: string; appointmentDate: string; status: number; }");
+lines.push("interface RecentInvoice { id: string; invoiceNumber: string; patientName: string; totalAmount: number; status: string; }");
+lines.push("const APPT_STATUS_LABELS: Record<number, string> = { 0: \"Scheduled\", 1: \"Completed\", 2: \"Cancelled\", 3: \"NoShow\" };");
+lines.push("const APPT_STATUS_STYLES: Record<number, string> = { 0: \"bg-blue-100 text-blue-700\", 1: \"bg-emerald-100 text-emerald-700\", 2: \"bg-rose-100 text-rose-700\", 3: \"bg-amber-100 text-amber-700\" };");
+lines.push("");
+const body = fs.readFileSync("dashboard-body.txt", "utf8");
+lines.push(body);
+fs.writeFileSync("client/src/pages/Dashboard.tsx", lines.join("\n"), "utf8");
+console.log("done");
